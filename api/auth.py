@@ -23,10 +23,17 @@ GOOGLE_CLIENT_ID = (
     or "507309950334-6o5c75ms28a9bng6e9cq5jkv2spssnt6.apps.googleusercontent.com"
 )
 
-# Email whitelist — only these accounts can call protected endpoints
+# Email whitelist — only these accounts can call protected endpoints.
+# Override via NEO_EMAIL_WHITELIST env var (comma-separated) in production;
+# default baked in so it just works on first deploy.
+_DEFAULT_WHITELIST = (
+    "pantepante72@gmail.com,"
+    "chayangkulkongkavitool@gmail.com,"
+    "hariss2549zaza@gmail.com"
+)
 WHITELIST = {
     e.strip().lower()
-    for e in (os.getenv("NEO_EMAIL_WHITELIST") or "pantepante72@gmail.com").split(",")
+    for e in (os.getenv("NEO_EMAIL_WHITELIST") or _DEFAULT_WHITELIST).split(",")
     if e.strip()
 }
 
