@@ -261,6 +261,49 @@ body {
 }
 .loading { color: var(--muted); font-size: 12px; font-style: italic; }
 
+/* Cost table */
+.cost-table { display: flex; flex-direction: column; gap: 2px; }
+.cost-row {
+  display: grid;
+  grid-template-columns: 1.4fr 90px 110px 110px 100px;
+  gap: 12px; align-items: center;
+  padding: 10px 12px; border-radius: 8px;
+  font-size: 12px;
+  transition: background .15s;
+}
+.cost-row:hover { background: var(--bg-2); }
+.cost-row.head {
+  color: var(--muted); font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; font-weight: 700;
+  border-bottom: 1px solid var(--line); border-radius: 0;
+  padding-bottom: 10px; margin-bottom: 4px;
+}
+.cost-row .model-name {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--fg); font-size: 11px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cost-row .num {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--muted);
+}
+.cost-row .total {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--sage); font-weight: 700;
+}
+.cost-row.total-row {
+  background: linear-gradient(90deg, rgba(234,179,8,0.08), transparent);
+  border-top: 1px solid var(--line);
+  margin-top: 6px; padding-top: 14px;
+}
+.cost-row.total-row .model-name { color: var(--sage); font-weight: 700; letter-spacing: 1px; }
+@media (max-width: 720px) {
+  .cost-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .cost-row.head { display: none; }
+}
+
 /* Agent color chips */
 .ag-neo { background: rgba(255,107,53,0.18); color: var(--neo); }
 .ag-atlas { background: rgba(20,184,166,0.18); color: var(--atlas); }
@@ -304,6 +347,13 @@ body {
     <div class="card" style="--accent: var(--byte)"><div class="lbl">Tokens In</div><div class="val" id="tokIn">—</div><div class="sub">est. prompt tokens</div></div>
     <div class="card" style="--accent: var(--pixel)"><div class="lbl">Tokens Out</div><div class="val" id="tokOut">—</div><div class="sub">est. response tokens</div></div>
     <div class="card" style="--accent: var(--luna)"><div class="lbl">Avg Response</div><div class="val" id="avgMs">—</div><div class="sub">milliseconds</div></div>
+    <div class="card" style="--accent: var(--sage)"><div class="lbl">Est. Cost</div><div class="val" id="costUsd">—</div><div class="sub" id="costThb">≈ ฿ —</div></div>
+  </div>
+
+  <!-- Cost Breakdown -->
+  <div class="section-title">Cost Breakdown <span style="color:var(--dim); font-size:10px; margin-left:4px;" id="priceNote">per model · USD</span></div>
+  <div class="panel">
+    <div id="costTable"><span class="loading">loading…</span></div>
   </div>
 
   <!-- Chats per day -->
@@ -350,6 +400,31 @@ const ACTION_COLORS = {
   chat_error: 'var(--rex)', chat_empty: 'var(--rex)',
   conversation_delete: 'var(--dim)', login: 'var(--pixel)',
 };
+
+// Claude API pricing — USD per 1M tokens (2026 rates)
+const PRICING = [
+  { match: /opus/i,    in: 15.00, out: 75.00 },
+  { match: /sonnet/i,  in:  3.00, out: 15.00 },
+  { match: /haiku/i,   in:  0.80, out:  4.00 },
+];
+const FALLBACK_PRICE = { in: 3.00, out: 15.00 };  // assume Sonnet if unknown
+const USD_TO_THB = 36;  // rough rate; adjust if needed
+
+function priceFor(model) {
+  if (!model) return FALLBACK_PRICE;
+  for (const p of PRICING) if (p.match.test(model)) return { in: p.in, out: p.out };
+  return FALLBACK_PRICE;
+}
+function calcCost(tokIn, tokOut, model) {
+  const p = priceFor(model);
+  return (tokIn / 1_000_000) * p.in + (tokOut / 1_000_000) * p.out;
+}
+function fmtUsd(n) {
+  if (n < 0.01) return '$' + n.toFixed(4);
+  if (n < 1)    return '$' + n.toFixed(3);
+  return '$' + n.toFixed(2);
+}
+function fmtThb(n) { return '฿' + (n * USD_TO_THB).toFixed(2); }
 
 function fmtNum(n) { return (n || 0).toLocaleString('en-US'); }
 function fmtMs(n) { return n < 1000 ? n + 'ms' : (n/1000).toFixed(1) + 's'; }
@@ -425,6 +500,9 @@ function renderStats(s, days) {
     });
   }
 
+  // Cost breakdown
+  renderCost(s.by_model || []);
+
   // By action
   const byAc = document.getElementById('byAction');
   byAc.innerHTML = '';
@@ -443,6 +521,53 @@ function renderStats(s, days) {
         </div>`);
     });
   }
+}
+
+function renderCost(byModel) {
+  const wrap = document.getElementById('costTable');
+  const costCard = document.getElementById('costUsd');
+  const thbCard  = document.getElementById('costThb');
+
+  if (!byModel.length) {
+    wrap.innerHTML = '<div class="empty" style="padding:30px;">ยังไม่มีข้อมูล tokens</div>';
+    costCard.textContent = '$0.00';
+    thbCard.textContent  = '≈ ฿0.00';
+    return;
+  }
+
+  let totalUsd = 0;
+  const rows = byModel.map(r => {
+    const p = priceFor(r.model);
+    const ci = (r.ti  || 0) / 1_000_000 * p.in;
+    const co = (r.tout || 0) / 1_000_000 * p.out;
+    const sub = ci + co;
+    totalUsd += sub;
+    const shortModel = (r.model || '—').replace(/^claude-/, '').replace(/-\d{8}$/, '');
+    return `
+      <div class="cost-row">
+        <div class="model-name" title="${esc(r.model)}">${esc(shortModel)}</div>
+        <div class="num">${fmtNum(r.n)}×</div>
+        <div class="num">${fmtNum(r.ti)} / ${fmtUsd(ci)}</div>
+        <div class="num">${fmtNum(r.tout)} / ${fmtUsd(co)}</div>
+        <div class="total">${fmtUsd(sub)}</div>
+      </div>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="cost-table">
+      <div class="cost-row head">
+        <div>Model</div><div>Calls</div><div>Tokens In / Cost</div><div>Tokens Out / Cost</div><div>Subtotal</div>
+      </div>
+      ${rows}
+      <div class="cost-row total-row">
+        <div class="model-name">TOTAL</div>
+        <div class="num"></div><div class="num"></div><div class="num"></div>
+        <div class="total">${fmtUsd(totalUsd)}</div>
+      </div>
+    </div>`;
+
+  costCard.textContent = fmtUsd(totalUsd);
+  thbCard.textContent  = '≈ ' + fmtThb(totalUsd);
 }
 
 function esc(s) {
