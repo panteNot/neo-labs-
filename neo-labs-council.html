@@ -263,7 +263,7 @@ body {
 <script src="https://browser.sentry-cdn.com/8.0.0/bundle.min.js" crossorigin="anonymous"></script>
 <script>
   fetch('/config').then(r=>r.json()).then(({sentry_dsn})=>{
-    if(sentry_dsn) Sentry.init({dsn:sentry_dsn,tracesSampleRate:0.1});
+    if(sentry_dsn && window.Sentry) Sentry.init({dsn:sentry_dsn,tracesSampleRate:0.1,denyUrls:[/chrome-extension:\/\//i,/moz-extension:\/\//i,/safari-(web-)?extension:\/\//i]});
   }).catch(()=>{});
 </script>
 <script src="neo-auth.js?v=2"></script>
