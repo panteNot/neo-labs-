@@ -31,6 +31,7 @@
 
     /* --- Actions --- */
     { group: 'Actions', id: 'x-shortcuts', label: 'Show keyboard shortcuts', hint: '?', icon: '⌨', run: () => { if (window.NeoShortcuts) window.NeoShortcuts.open(); else toast('Shortcuts ยังไม่พร้อม'); } },
+    { group: 'Actions', id: 'x-prompts', label: 'Open Prompt Library', hint: '', icon: '📌', run: () => { if (window.NeoPrompts) window.NeoPrompts.open(); else toast('Prompt Library ยังไม่พร้อม (หน้านี้ไม่มี)'); } },
     { group: 'Actions', id: 'x-export',  label: 'Export conversation → Markdown', hint: '', icon: '↓', run: () => exportMD() },
     { group: 'Actions', id: 'x-theme',   label: 'Toggle theme (dark / light)', hint: '',  icon: '☾', run: () => toggleTheme() },
     { group: 'Actions', id: 'x-logout',  label: 'Log out',               hint: '⎋', icon: '↗', run: () => logout() },
