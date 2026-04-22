@@ -74,6 +74,7 @@ async def orchestrate(
     model: str = "claude-sonnet-4-6",
     max_delegations: int = 3,
     max_loops: int = 4,
+    thinking: bool = False,
 ):
     """Run multi-agent orchestration, yielding events.
 
@@ -103,13 +104,20 @@ async def orchestrate(
         if delegations_used < max_delegations:
             tools = [delegate_tool] + tools
         try:
-            resp = await client.messages.create(
+            root_kwargs = dict(
                 model=model,
-                max_tokens=1200,  # tightened from 2000 — brief synth, long delegate responses come from specialists
+                max_tokens=8000 if thinking else 1200,
                 system=agents_map[root_agent] + ORCHESTRATOR_SUFFIX,
                 tools=tools if tools else None,
                 messages=messages,
             )
+            if thinking:
+                # Root agent reasons before deciding whether to delegate. Thinking
+                # blocks in resp.content flow back into messages[] on the next
+                # loop (via `resp.content` append), which is required for Claude
+                # to chain-of-thought across tool_use cycles correctly.
+                root_kwargs["thinking"] = {"type": "enabled", "budget_tokens": 5000}
+            resp = await client.messages.create(**root_kwargs)
         except Exception as e:
             yield {"type": "error", "message": f"root call failed: {e}"}
             return

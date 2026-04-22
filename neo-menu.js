@@ -34,17 +34,20 @@
       ],
     },
     {
-      title: 'Agents',
+      // Clicking an agent now opens the detailed profile page — not an
+      // in-place invocation. The profile itself has a "คุยกับ X" CTA that
+      // routes to the office.
+      title: 'Agents — ดูโปรไฟล์',
       items: [
-        { icon: '🟠', label: 'NEO',   sub: 'CEO / Main',             run: () => call('neo') },
-        { icon: '🟢', label: 'ATLAS', sub: 'Chief of Staff / PM',    run: () => call('atlas') },
-        { icon: '🟣', label: 'NOVA',  sub: 'Research',               run: () => call('nova') },
-        { icon: '🩷', label: 'LUNA',  sub: 'UX/UI Designer',         run: () => call('luna') },
-        { icon: '🟢', label: 'PIXEL', sub: 'Slide Maker',            run: () => call('pixel') },
-        { icon: '🟡', label: 'SAGE',  sub: 'Study Tutor',            run: () => call('sage') },
-        { icon: '🔴', label: 'REX',   sub: "Devil's Advocate",       run: () => call('rex') },
-        { icon: '🔵', label: 'BYTE',  sub: 'Code Reviewer',          run: () => call('byte') },
-        { icon: '⚪', label: 'QUILL', sub: 'Copywriter',             run: () => call('quill') },
+        { icon: '🟠', label: 'NEO',   sub: 'CEO / Main',             href: 'neo-labs-agent.html?id=neo' },
+        { icon: '🟢', label: 'ATLAS', sub: 'Chief of Staff / PM',    href: 'neo-labs-agent.html?id=atlas' },
+        { icon: '🟣', label: 'NOVA',  sub: 'Research',               href: 'neo-labs-agent.html?id=nova' },
+        { icon: '🩷', label: 'LUNA',  sub: 'UX/UI Designer',         href: 'neo-labs-agent.html?id=luna' },
+        { icon: '🟢', label: 'PIXEL', sub: 'Slide Maker',            href: 'neo-labs-agent.html?id=pixel' },
+        { icon: '🟡', label: 'SAGE',  sub: 'Study Tutor',            href: 'neo-labs-agent.html?id=sage' },
+        { icon: '🔴', label: 'REX',   sub: "Devil's Advocate",       href: 'neo-labs-agent.html?id=rex' },
+        { icon: '🔵', label: 'BYTE',  sub: 'Code Reviewer',          href: 'neo-labs-agent.html?id=byte' },
+        { icon: '⚪', label: 'QUILL', sub: 'Copywriter',             href: 'neo-labs-agent.html?id=quill' },
       ],
     },
     {
@@ -220,12 +223,21 @@
 
   function build() {
     injectStyle();
-    const fab = document.createElement('button');
-    fab.className = 'neo-mb-fab';
-    fab.id = 'neoMenuFab';
-    fab.setAttribute('aria-label', 'Open menu');
-    fab.title = 'Menu';
-    fab.textContent = '☰';
+    // If the page provides an inline slot (#neoMenuSlot), use that as the
+    // trigger instead of a floating FAB. Prevents overlap with other fixed
+    // panels (e.g. the office 💬 conversations drawer).
+    const slot = document.getElementById('neoMenuSlot');
+    let fab;
+    if (slot) {
+      fab = slot;
+    } else {
+      fab = document.createElement('button');
+      fab.className = 'neo-mb-fab';
+      fab.id = 'neoMenuFab';
+      fab.setAttribute('aria-label', 'Open menu');
+      fab.title = 'Menu';
+      fab.textContent = '☰';
+    }
 
     const backdrop = document.createElement('div');
     backdrop.className = 'neo-mb-backdrop';
@@ -262,7 +274,7 @@
       <div class="neo-mb-body">${bodyHTML}</div>
     `;
 
-    document.body.appendChild(fab);
+    if (!slot) document.body.appendChild(fab);
     document.body.appendChild(backdrop);
     document.body.appendChild(drawer);
 
@@ -309,9 +321,11 @@
 
   window.NeoMenu = { open, close, toggle };
 
-  // Observe `.conv-panel` open-state on the office page so the ☰ FAB
-  // ducks out of the way whenever the conversations drawer is visible.
+  // FAB-only: if the trigger is an inline topbar slot, it already lives in
+  // the document flow and doesn't overlap the conversations panel, so no
+  // ducking is needed.
   function watchConvPanel() {
+    if (!dom.fab.classList.contains('neo-mb-fab')) return;
     const panel = document.querySelector('.conv-panel');
     if (!panel) return;
     const sync = () => {

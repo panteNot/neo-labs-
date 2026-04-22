@@ -221,6 +221,11 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
     conv_id = (body.get("conv_id") or "").strip() or None
     persist = bool(body.get("persist", True))  # frontend can opt-out
     attachments = body.get("attachments") or []  # [{type, media_type, data, name}]
+    # Extended Thinking — surfaces Claude's reasoning before the final answer.
+    # Client opts-in per request (DEEP THINK toggle in office topbar). Default
+    # OFF: thinking budget adds ~5k extra tokens billed as output, so we only
+    # pay when the user explicitly asks for deeper reasoning.
+    thinking_on = bool(body.get("thinking", False))
 
     if not prompt and not attachments:
         return {"error": "no prompt"}
@@ -335,20 +340,24 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
                 yield f"\n\n⚠️ db error (user turn): {type(e).__name__}: {str(e)[:200]}"
                 return
         try:
-            async with client.messages.stream(
+            # Build stream kwargs — thinking requires max_tokens > budget_tokens
+            stream_kwargs = dict(
                 model=api_model,
-                max_tokens=1200,  # raised from 800 — web_search result + synthesis needs headroom
+                max_tokens=8000 if thinking_on else 1200,
                 system=system_prompt,
                 messages=messages,
-                # Anthropic built-in web search — server-side tool (no local
-                # execution needed). Capped at 3 uses per message to protect
-                # budget: $10 / 1000 searches ≈ $0.01 per /chat if fully used.
                 tools=[{
                     "type": "web_search_20250305",
                     "name": "web_search",
                     "max_uses": 3,
                 }],
-            ) as stream:
+            )
+            if thinking_on:
+                # 5000-token reasoning budget. stream.text_stream yields only
+                # final-answer text (thinking blocks stream separately and are
+                # discarded here — we don't expose the chain-of-thought to UI).
+                stream_kwargs["thinking"] = {"type": "enabled", "budget_tokens": 5000}
+            async with client.messages.stream(**stream_kwargs) as stream:
                 stream_opened = True
                 async for text in stream.text_stream:
                     full += text
@@ -421,6 +430,7 @@ async def orchestrate_endpoint(request: Request, body: dict, user: dict = Depend
     prompt = (body.get("prompt") or "").strip()
     agent = (body.get("agent") or "neo").lower()
     model = body.get("model") or "claude-sonnet-4-6"
+    thinking_on = bool(body.get("thinking", False))
 
     if not prompt:
         return {"error": "no prompt"}
@@ -437,7 +447,7 @@ async def orchestrate_endpoint(request: Request, body: dict, user: dict = Depend
 
     async def stream():
         delegations = 0
-        async for event in orchestrate(prompt, AGENTS, agent, api_model):
+        async for event in orchestrate(prompt, AGENTS, agent, api_model, thinking=thinking_on):
             yield json.dumps(event, ensure_ascii=False) + "\n"
             t = event.get("type")
             if t == "handoff":

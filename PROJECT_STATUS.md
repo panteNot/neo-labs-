@@ -48,12 +48,12 @@
 | Phase | Task | Effort | Status |
 |-------|------|--------|--------|
 | B1 | Backend Foundation (FastAPI skeleton + Claude SDK + env) | 3-4 hr | ✅ Done (2026-04-17) |
-| B2 | Single Agent Call (NEO only, HTTP) | 2-3 hr | ⏳ Blocked (ต้องการ API key จริง) |
-| B3 | WebSocket + Live Feed (streaming) | 3-4 hr | ⏳ Not started |
-| B4 | Multi-Agent Orchestration (9 agents + handoff) | 6-8 hr | ⏳ Not started |
-| B5 | Polish + Deploy | 1-2 hr | ⏳ Not started |
+| B2 | Single Agent Call (NEO only, HTTP) | 2-3 hr | ✅ Done (2026-04-19) |
+| B3 | WebSocket + Live Feed (streaming) | 3-4 hr | ✅ Done (2026-04-20) |
+| B4 | Multi-Agent Orchestration (9 agents + handoff) | 6-8 hr | ✅ Done (2026-04-21) |
+| B5 | Polish + Deploy | 1-2 hr | ✅ Done (2026-04-22) — Railway + Nixpacks |
 
-**Total B:** 15-21 hr (~3-5 วัน, $20)
+**Total B:** ✅ เสร็จสมบูรณ์ — Live ที่ https://web-production-b78bb.up.railway.app
 
 ---
 

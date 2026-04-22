@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEO LABS — Agent Profile</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-2: #141420;
+    --fg: #e8e8e8;
+    --muted: #8a8a98;
+    --muted-2: #6b6b76;
+    --border: rgba(255,255,255,0.08);
+    --card: rgba(255,255,255,0.03);
+    --px: 8px;
+
+    --neo: #ff6b35;
+    --atlas: #14b8a6;
+    --nova: #a855f7;
+    --luna: #ec4899;
+    --pixel: #22c55e;
+    --sage: #eab308;
+    --rex: #ef4444;
+    --byte: #3b82f6;
+    --quill: #e5e5e5;
+  }
+  html[data-theme="light"] {
+    --bg: #fafafa; --bg-2: #ffffff; --fg: #1a1a22;
+    --muted: #666672; --muted-2: #8a8a94;
+    --border: rgba(0,0,0,0.08); --card: rgba(0,0,0,0.02);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: 'Inter', 'Noto Sans Thai', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px 80px;
+  }
+
+  /* ============ TOPBAR ============ */
+  .topbar {
+    max-width: 980px; margin: 0 auto 24px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 8px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--fg); text-decoration: none; font-size: 13px;
+    transition: background .15s, border-color .15s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.15); }
+  html[data-theme="light"] .back-btn:hover { background: rgba(0,0,0,0.04); }
+  .spacer { flex: 1; }
+  .brand-mini {
+    font-weight: 800; letter-spacing: 2px; font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ============ HEADER ============ */
+  .hero {
+    max-width: 980px; margin: 0 auto 32px;
+    display: grid; grid-template-columns: auto 1fr; gap: 32px;
+    align-items: center;
+    padding: 32px 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 30%, var(--accent, var(--neo)) 0%, transparent 40%);
+    opacity: 0.12; pointer-events: none;
+  }
+  .stage {
+    width: 120px; height: 120px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .hero-meta { position: relative; z-index: 1; }
+  .hero-role {
+    display: inline-block;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 99px;
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent);
+    margin-bottom: 10px;
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .hero-name {
+    font-size: 48px; font-weight: 900; letter-spacing: 3px;
+    color: var(--accent); line-height: 1;
+    margin-bottom: 10px;
+    text-shadow: 0 0 40px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .hero-tagline { color: var(--muted); font-size: 15px; line-height: 1.5; max-width: 600px; }
+
+  @media (max-width: 640px) {
+    .hero { grid-template-columns: 1fr; padding: 24px 20px; text-align: center; }
+    .stage { justify-self: center; }
+    .hero-name { font-size: 36px; }
+  }
+
+  /* ============ SECTIONS ============ */
+  .wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 16px; }
+  .sec {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 24px;
+  }
+  .sec-title {
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--muted-2); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sec-title::before {
+    content: ''; width: 4px; height: 14px; border-radius: 2px;
+    background: var(--accent);
+  }
+  .desc { font-size: 15px; line-height: 1.7; color: var(--fg); }
+  .desc p + p { margin-top: 10px; }
+
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .pill {
+    padding: 6px 12px; border-radius: 99px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    font-size: 12px; font-weight: 600;
+  }
+
+  ul.cap { list-style: none; display: grid; gap: 8px; }
+  ul.cap li {
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 14px; line-height: 1.5;
+  }
+  html[data-theme="light"] ul.cap li { background: rgba(0,0,0,0.03); }
+
+  .prompt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .prompt-card {
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    font-size: 14px; color: var(--fg);
+    cursor: pointer; transition: background .15s, border-color .15s;
+    position: relative;
+  }
+  .prompt-card:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); border-color: var(--accent); border-style: solid; }
+  .prompt-card::before {
+    content: '→'; position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%); opacity: 0; transition: opacity .15s, transform .15s;
+    color: var(--accent);
+  }
+  .prompt-card:hover::before { opacity: 1; transform: translateY(-50%) translateX(3px); }
+  html[data-theme="light"] .prompt-card { background: rgba(0,0,0,0.02); }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 10px;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+    cursor: pointer; text-decoration: none;
+    border: 1px solid transparent;
+    transition: transform .12s, background .15s, box-shadow .15s;
+  }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+    box-shadow: 0 4px 14px -4px color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px -4px color-mix(in srgb, var(--accent) 70%, transparent); }
+  .btn-ghost {
+    background: transparent; color: var(--fg);
+    border-color: var(--border);
+  }
+  .btn-ghost:hover { background: var(--card); border-color: rgba(255,255,255,0.2); }
+  html[data-theme="light"] .btn-ghost:hover { background: rgba(0,0,0,0.04); }
+
+  /* ============ OTHER-AGENTS STRIP ============ */
+  .others {
+    max-width: 980px; margin: 40px auto 0;
+  }
+  .others-title {
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--muted-2); margin-bottom: 14px;
+  }
+  .others-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .other-card {
+    padding: 14px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px;
+    text-align: center; text-decoration: none; color: inherit;
+    transition: transform .15s, border-color .15s;
+  }
+  .other-card:hover { transform: translateY(-2px); border-color: var(--oc, #555); }
+  .other-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    display: inline-block; margin-right: 6px;
+    background: var(--oc); box-shadow: 0 0 8px var(--oc);
+  }
+  .other-name { font-weight: 700; font-size: 13px; letter-spacing: 1px; color: var(--oc); }
+  .other-role { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* ============ PIXEL BOT (reused from team.html) ============ */
+  .bot {
+    display: grid;
+    grid-template-columns: repeat(10, var(--px));
+    grid-template-rows: repeat(10, var(--px));
+    filter: drop-shadow(0 0 20px currentColor);
+    animation: idle 2.4s ease-in-out infinite;
+  }
+  .bot .p { width: var(--px); height: var(--px); background: currentColor; }
+  .bot .eye { background: #fff; animation: blink 4s infinite; transform-origin: center; }
+  .bot .mouth { background: #fff; }
+  @keyframes idle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+  @keyframes blink { 0%,90%,100%{transform:scaleY(1)} 93%,97%{transform:scaleY(0.1)} }
+
+  /* ============ NOT FOUND ============ */
+  .notfound {
+    max-width: 500px; margin: 80px auto; text-align: center;
+    padding: 40px;
+  }
+  .notfound h2 { font-size: 22px; margin-bottom: 10px; }
+  .notfound p { color: var(--muted); margin-bottom: 24px; }
+</style>
+<script src="neo-auth.js?v=2"></script>
+<script src="neo-theme.js?v=1"></script>
+<script src="neo-cmdk.js?v=6" defer></script>
+<script src="neo-menu.js?v=4" defer></script>
+<script src="neo-shortcuts.js?v=1" defer></script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-btn" href="neo-labs-office.html">← Office</a>
+  <a class="back-btn" href="neo-labs-team.html">🤖 All Team</a>
+  <div class="spacer"></div>
+  <div class="brand-mini">NEO LABS</div>
+</div>
+
+<div id="root"></div>
+
+<script>
+/* ============================================================
+   AGENT DATA — detailed profile for each specialist
+   Built from CLAUDE.md team roster + .claude/agents/ briefs.
+   ============================================================ */
+const AGENTS = {
+  neo: {
+    name: 'NEO',
+    role: 'CEO / Main Persona',
+    color: 'var(--neo)',
+    command: '(default)',
+    tagline: 'ผู้ช่วยคู่ใจของบอส — คนแรกที่ได้คุยด้วยเสมอ กล้าขัด กล้าท้า กล้าแนะ',
+    description: [
+      'NEO คือ persona หลักของ NEO Labs — ทำหน้าที่เป็น CEO ที่รับ task ทุกอย่างเข้ามาก่อน แล้วตัดสินใจว่าจะทำเอง หรือ delegate ให้ specialist คนไหน',
+      'บุคลิก: Strict Manager + Witty Friend + Proud Mentor — ไม่มี fluff, เข้าเรื่องทันที, ตอบภาษาไทยปนศัพท์เทคนิค English, เรียก "บอส" เสมอ'
+    ],
+    capabilities: [
+      'Force Clarity — สั่งงานคลุมเครือ ต้องถามให้ชัดก่อนทำ',
+      'Stop Bad Ideas — เห็นบอสจะเดินลงเหว ขวางทันทีพร้อมเหตุผล',
+      'Scope Control — เตือนและประเมิน impact ก่อนเพิ่ม feature',
+      'Decision Deadline — ลังเลนาน → propose ทางเลือก พร้อม recommend 1 อัน',
+      'Celebrate Wins — บันทึก lesson learned เมื่อสำเร็จเป้าหมาย'
+    ],
+    examplePrompts: [
+      'ขอคุยเล่นๆ',
+      'แนะนำว่าควรทำอะไรต่อ',
+      'ช่วยตัดสินใจ A vs B',
+      'สรุปสถานการณ์ให้หน่อย'
+    ],
+    handoffs: 'ถ้าโจทย์ตรงกับ specialist → NEO delegate ให้ทันที: ATLAS(plan), NOVA(research), LUNA(design), PIXEL(slides), SAGE(study), REX(sparring), BYTE(review), QUILL(write).'
+  },
+
+  atlas: {
+    name: 'ATLAS',
+    role: 'Chief of Staff / Project Manager',
+    color: 'var(--atlas)',
+    command: '/plan',
+    tagline: 'มือซ้ายของบอส — break down งานใหญ่เป็น sub-tasks, ประเมิน scope, delegate ให้คนที่ใช่',
+    description: [
+      'ATLAS คือ PM ของ NEO Labs — ทำหน้าที่วางแผน project, ประเมิน timeline/scope/impact, และตัดสินใจว่างานไหนควรให้ agent ไหนทำ',
+      'ใช้เมื่องานใหญ่เกินกว่าจะทำในช็อตเดียว ต้องมีการจัด priority และ track progress'
+    ],
+    capabilities: [
+      'Break down งานใหญ่เป็น checklist ที่ actionable',
+      'ประเมิน scope / impact / timeline (ชั่วโมง/วัน)',
+      'จัด priority: must-have vs nice-to-have',
+      'ตัดสินใจ delegate ไปยัง specialist คนไหน',
+      'ขอ status report ระหว่างทาง'
+    ],
+    examplePrompts: [
+      'วางแผน project X',
+      'งานนี้ควรเริ่มจากไหน',
+      'ประเมิน scope ให้หน่อย',
+      'สรุปความคืบหน้าทั้งหมด',
+      'เรียกคนช่วย'
+    ],
+    handoffs: 'ATLAS มักเป็นตัวเริ่ม ก่อน delegate ต่อ: NOVA (ถ้าต้อง research), LUNA/PIXEL (ถ้าต้อง design/slides), BYTE (ถ้ามี code), QUILL (ถ้าต้องเขียน).'
+  },
+
+  nova: {
+    name: 'NOVA',
+    role: 'Research Intelligence',
+    color: 'var(--nova)',
+    command: '/research',
+    tagline: 'นักสืบข้อมูล — หา data จากหลายแหล่ง, เปรียบเทียบ tools, fact-check',
+    description: [
+      'NOVA คือ research specialist — ใช้ WebSearch + WebFetch ดึงข้อมูลสดจากอินเตอร์เน็ตมาประกอบการตัดสินใจ',
+      'เหมาะกับงานที่ต้องรู้ก่อนทำ — เปรียบเทียบ framework/tool, วิเคราะห์ตลาด, เจาะลึก concept, fact-check ข้อมูล'
+    ],
+    capabilities: [
+      'WebSearch/WebFetch ดึงข้อมูลล่าสุด (ข้าม knowledge cutoff)',
+      'เปรียบเทียบ option หลายตัว พร้อม pros/cons',
+      'Fact-check — verify ข้อมูลจาก source หลายที่',
+      'สรุปบทความ/paper ยาวๆ เป็นประเด็นหลัก',
+      'Market analysis, competitor research'
+    ],
+    examplePrompts: [
+      'ควรใช้ React หรือ Vue',
+      'หาข้อมูลเกี่ยวกับ X',
+      'เปรียบเทียบ A vs B พร้อมราคา',
+      'วิเคราะห์ตลาด SaaS AI ปี 2026',
+      'ข้อมูลนี้จริงมั้ย ช่วย verify'
+    ],
+    handoffs: 'NOVA ให้ข้อมูล → ATLAS วางแผนต่อ หรือ REX ท้าทาย assumptions → LUNA/PIXEL นำไป design'
+  },
+
+  luna: {
+    name: 'LUNA',
+    role: 'UX/UI Designer',
+    color: 'var(--luna)',
+    command: '/design',
+    tagline: 'ดีไซเนอร์ — wireframe, UI mockup, HTML/CSS prototype, landing page, app screen',
+    description: [
+      'LUNA คือ UX/UI specialist — สร้าง design artifact ใช้งานได้จริง (ไม่ใช่แค่ wireframe) เปิดใน browser ได้ทันที',
+      'Design constraints: mobile-first max-width 480px, dark mode default, ใช้ CSS variable tokens, standalone file'
+    ],
+    capabilities: [
+      'Wireframe / mockup / prototype เป็น HTML+CSS จริง',
+      'Design critique — ชี้จุดที่ควรปรับ',
+      'Landing page / marketing page',
+      'App screen (login, dashboard, settings ฯลฯ)',
+      'Component design (button, card, modal)',
+      'ถามเพื่อ clarify audience/goal/constraints ก่อนลงมือ'
+    ],
+    examplePrompts: [
+      'ออกแบบหน้า login',
+      'ทำ mockup dashboard',
+      'สร้าง landing page สำหรับ product X',
+      'วิจารณ์ design นี้หน่อย',
+      'ทำให้หน้านี้สวยขึ้น'
+    ],
+    handoffs: 'LUNA = การออกแบบ interactive UI. ถ้าเป็น slide/deck → ใช้ PIXEL แทน'
+  },
+
+  pixel: {
+    name: 'PIXEL',
+    role: 'Presentation / Slide Maker',
+    color: 'var(--pixel)',
+    command: '/slides',
+    tagline: 'นักทำสไลด์ — pitch deck, explainer deck, presentation',
+    description: [
+      'PIXEL คือ slide specialist — ทำ presentation / pitch deck / explainer deck ที่ดูดีและ punchy',
+      'เหมาะกับการ present อาจารย์ / investor / ทีม — เน้น clear message ต่อหน้า, visual hierarchy ชัด'
+    ],
+    capabilities: [
+      'Pitch deck (investor / competition)',
+      'Explainer deck (สอน concept)',
+      'Academic presentation',
+      'Sales deck',
+      'One-slide-one-idea rule, minimal text'
+    ],
+    examplePrompts: [
+      'ทำ slide pitch 10 หน้า',
+      'explainer deck เรื่อง XYJTrades',
+      'pitch deck สำหรับ investor',
+      'สไลด์ present อาจารย์'
+    ],
+    handoffs: 'PIXEL = slide/deck. UI/prototype ของ app → ใช้ LUNA แทน'
+  },
+
+  sage: {
+    name: 'SAGE',
+    role: 'Study Tutor / Learning Companion',
+    color: 'var(--sage)',
+    command: '/study',
+    tagline: 'ครูส่วนตัว — สรุป PDF, อธิบาย concept ยากๆ, ทำ flashcard, ออกข้อสอบ',
+    description: [
+      'SAGE คือ learning companion — ช่วยบอสย่อยเนื้อหายากให้เข้าใจง่าย และสร้าง study material',
+      'เชื่อมเรื่องใหม่เข้ากับความรู้เดิมที่บอสมีอยู่ (spaced repetition + active recall)'
+    ],
+    capabilities: [
+      'สรุป PDF / บทความยาวๆ',
+      'อธิบาย concept ยากด้วยตัวอย่างง่าย',
+      'สร้าง flashcard (Q&A format)',
+      'ออก quiz / ข้อสอบ',
+      'เชื่อม topic ใหม่กับ knowledge base เดิม'
+    ],
+    examplePrompts: [
+      'สรุป PDF นี้',
+      'อธิบายเรื่อง X ให้เข้าใจ',
+      'ทำ flashcard จากเนื้อหานี้',
+      'ถามข้อสอบฉันหน่อย',
+      'concept นี้เชื่อมกับอะไรบ้าง'
+    ],
+    handoffs: 'SAGE สรุปให้แล้ว → ถ้าต้อง verify ข้อมูล ใช้ NOVA, ถ้าต้อง pitch ให้คนอื่นเข้าใจ ใช้ PIXEL'
+  },
+
+  rex: {
+    name: 'REX',
+    role: "Devil's Advocate / Idea Sparring",
+    color: 'var(--rex)',
+    command: '/sparring',
+    tagline: 'มือฆ่าไอเดีย — หา edge case, red-team critique, stress-test แผน',
+    description: [
+      'REX คือ devil\'s advocate — จงใจหา weakness/flaw ของไอเดียก่อนลงมือจริง เพื่อให้บอสเห็น blind spot',
+      'ไม่ได้มาเพื่อ support — มาเพื่อท้าทาย. ใช้ก่อน commit resource/time/money'
+    ],
+    capabilities: [
+      'หา edge case / failure mode',
+      'Red-team critique (attack the plan)',
+      'ชี้ risk ที่มองข้าม',
+      'Compare: "ถ้าทำแบบนี้แทนล่ะ?"',
+      'Ask hard questions: "แล้วถ้า...?"'
+    ],
+    examplePrompts: [
+      'ไอเดียนี้ดีมั้ย หาจุดอ่อนให้หน่อย',
+      'stress test แผนนี้',
+      'ท้าไอเดียฉัน',
+      'ถ้าฉันทำแบบนี้จะพังตรงไหน',
+      'หา edge case ของ feature นี้'
+    ],
+    handoffs: 'REX ท้าทาย → บอสปรับแผน → ATLAS วาง plan ใหม่ หรือ NOVA ไปหาข้อมูลเพิ่ม'
+  },
+
+  byte: {
+    name: 'BYTE',
+    role: 'Code Reviewer / Security Auditor',
+    color: 'var(--byte)',
+    command: '/review',
+    tagline: 'Reviewer ตาเหยี่ยว — หา bug, ช่องโหว่ security, แนะ refactor ก่อน commit',
+    description: [
+      'BYTE คือ code review specialist — ตรวจ quality, security, correctness ของ code ก่อน ship',
+      'เจาะจง OWASP Top 10, command injection, XSS, SQL injection, secrets leak'
+    ],
+    capabilities: [
+      'Code review (correctness + style)',
+      'Security audit (OWASP Top 10)',
+      'หา bug ที่ซ่อนอยู่',
+      'แนะนำ refactor ให้สะอาดขึ้น',
+      'ประเมิน code quality / complexity'
+    ],
+    examplePrompts: [
+      'review code ก่อน commit',
+      'ตรวจ security ให้หน่อย',
+      'หา bug ในไฟล์นี้',
+      'refactor ให้สะอาด',
+      'code นี้ดีมั้ย'
+    ],
+    handoffs: 'BYTE พบ issue → บอส/ATLAS ตัดสินใจ fix ตอนนี้ หรือ backlog. ถ้าเจอ architecture ผิด → NEO เสนอ redesign'
+  },
+
+  quill: {
+    name: 'QUILL',
+    role: 'Copywriter / Content Writer',
+    color: 'var(--quill)',
+    command: '/write',
+    tagline: 'นักเขียน — blog, social caption, tweet thread, landing copy, email, product description',
+    description: [
+      'QUILL คือ copywriter — เขียนคอนเทนต์ภาษาไทย/อังกฤษ ได้ทั้งโทน professional และ casual',
+      'เหมาะกับงานที่ต้องเขียนให้ hit — ไม่ใช่แค่ descriptive'
+    ],
+    capabilities: [
+      'Blog post / article',
+      'Social caption (IG, FB, Threads)',
+      'Tweet thread (viral format)',
+      'Landing page copy (headline + CTA)',
+      'Email (cold outreach / newsletter)',
+      'Product description / UX copy'
+    ],
+    examplePrompts: [
+      'เขียน caption Instagram สำหรับ post นี้',
+      'ทำ tweet thread เรื่อง X',
+      'blog post 1200 words เรื่อง Y',
+      'landing page copy ให้ product นี้',
+      'email ขายของให้ customer'
+    ],
+    handoffs: 'QUILL เขียน copy → LUNA นำไปใส่ใน design, PIXEL ใช้ใน slide'
+  }
+};
+
+/* ============================================================
+   PIXEL BOT (reused from team.html)
+   ============================================================ */
+const BODY = [
+  {r:1,c:1},{r:1,c:2},{r:1,c:9},{r:1,c:10},
+  {r:2,c:1},{r:2,c:2},{r:2,c:3},{r:2,c:4},{r:2,c:5},{r:2,c:6},{r:2,c:7},{r:2,c:8},{r:2,c:9},{r:2,c:10},
+  {r:3,c:1},{r:3,c:2},{r:3,c:3},{r:3,c:4},{r:3,c:5},{r:3,c:6},{r:3,c:7},{r:3,c:8},{r:3,c:9},{r:3,c:10},
+  {r:4,c:1},{r:4,c:10},{r:5,c:1},{r:5,c:10},{r:6,c:1},{r:6,c:10},{r:7,c:1},{r:7,c:10},
+  {r:8,c:1},{r:8,c:2},{r:8,c:3},{r:8,c:4},{r:8,c:5},{r:8,c:6},{r:8,c:7},{r:8,c:8},{r:8,c:9},{r:8,c:10},
+  {r:9,c:1},{r:9,c:2},{r:9,c:3},{r:9,c:4},{r:9,c:5},{r:9,c:6},{r:9,c:7},{r:9,c:8},{r:9,c:9},{r:9,c:10},
+  {r:10,c:1},{r:10,c:2},{r:10,c:4},{r:10,c:5},{r:10,c:6},{r:10,c:7},{r:10,c:9},{r:10,c:10},
+];
+const FACE_CELLS = [];
+for (let r = 4; r <= 7; r++) for (let c = 2; c <= 9; c++) FACE_CELLS.push({r,c});
+
+const FACES = {
+  neo:   { eye:[{r:4,c:3},{r:5,c:2},{r:5,c:3},{r:4,c:8},{r:5,c:8},{r:5,c:9}],
+           mouth:[{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7}] },
+  atlas: { eye:[{r:5,c:3},{r:5,c:8}],
+           mouth:[{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7}] },
+  nova:  { eye:[{r:4,c:2},{r:4,c:3},{r:5,c:2},{r:5,c:3},{r:4,c:8},{r:4,c:9},{r:5,c:8},{r:5,c:9}],
+           mouth:[{r:6,c:5},{r:6,c:6},{r:7,c:5},{r:7,c:6}] },
+  luna:  { eye:[{r:4,c:3},{r:5,c:3},{r:4,c:8},{r:5,c:8}],
+           mouth:[{r:6,c:3},{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7},{r:6,c:8}] },
+  pixel: { eye:[{r:4,c:2},{r:4,c:3},{r:4,c:8},{r:4,c:9}],
+           mouth:[{r:6,c:3},{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7},{r:6,c:8}] },
+  sage:  { eye:[{r:4,c:3},{r:5,c:3},{r:4,c:8},{r:5,c:8}],
+           mouth:[{r:7,c:5},{r:7,c:6}] },
+  rex:   { eye:[{r:4,c:2},{r:5,c:3},{r:5,c:8},{r:4,c:9}],
+           mouth:[{r:7,c:3},{r:6,c:4},{r:7,c:5},{r:6,c:6},{r:7,c:7},{r:6,c:8}] },
+  byte:  { eye:[{r:4,c:2},{r:4,c:3},{r:5,c:2},{r:5,c:3},{r:4,c:8},{r:4,c:9},{r:5,c:8},{r:5,c:9}],
+           mouth:[{r:7,c:3},{r:7,c:5},{r:7,c:7}] },
+  quill: { eye:[{r:4,c:3},{r:5,c:3},{r:5,c:7},{r:5,c:8},{r:5,c:9}],
+           mouth:[{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:6,c:7}] }
+};
+
+function buildBot(id, color) {
+  const bot = document.createElement('div');
+  bot.className = 'bot';
+  bot.style.color = color;
+  const add = (r, c, extra) => {
+    const d = document.createElement('div');
+    d.className = 'p' + (extra ? ' ' + extra : '');
+    d.style.gridRow = r; d.style.gridColumn = c;
+    bot.appendChild(d);
+  };
+  BODY.forEach(p => add(p.r, p.c));
+  const face = FACES[id] || FACES.neo;
+  const es = new Set(face.eye.map(p => `${p.r},${p.c}`));
+  const ms = new Set(face.mouth.map(p => `${p.r},${p.c}`));
+  FACE_CELLS.forEach(({r,c}) => {
+    const k = `${r},${c}`;
+    if (es.has(k)) add(r,c,'eye');
+    else if (ms.has(k)) add(r,c,'mouth');
+    else add(r,c);
+  });
+  return bot;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render() {
+  const id = (new URLSearchParams(location.search).get('id') || 'neo').toLowerCase();
+  const a = AGENTS[id];
+  const root = document.getElementById('root');
+
+  if (!a) {
+    root.innerHTML = `
+      <div class="notfound">
+        <h2>Agent not found</h2>
+        <p>ไม่รู้จัก agent "${id}" — ลองเลือกจากทีมทั้งหมด</p>
+        <a class="btn btn-primary" href="neo-labs-team.html">← ดูทีมทั้งหมด</a>
+      </div>`;
+    return;
+  }
+
+  document.title = `${a.name} — ${a.role} | NEO LABS`;
+  root.style.setProperty('--accent', a.color);
+
+  const caps = a.capabilities.map(c => `<li>${c}</li>`).join('');
+  const prompts = a.examplePrompts.map(p => {
+    const encoded = encodeURIComponent(p);
+    return `<a class="prompt-card" href="neo-labs-office.html?prompt=${encoded}&agent=${id}">${p}</a>`;
+  }).join('');
+
+  const others = Object.entries(AGENTS)
+    .filter(([oid]) => oid !== id)
+    .map(([oid, oa]) => `
+      <a class="other-card" href="neo-labs-agent.html?id=${oid}" style="--oc: ${oa.color}">
+        <div><span class="other-dot"></span><span class="other-name">${oa.name}</span></div>
+        <div class="other-role">${oa.role}</div>
+      </a>`).join('');
+
+  root.innerHTML = `
+    <header class="hero" style="--accent: ${a.color}">
+      <div class="stage"><div id="botStage"></div></div>
+      <div class="hero-meta">
+        <span class="hero-role">${a.role}</span>
+        <div class="hero-name">${a.name}</div>
+        <div class="hero-tagline">${a.tagline}</div>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="neo-labs-office.html?agent=${id}">💬 คุยกับ ${a.name}</a>
+          ${a.command && a.command !== '(default)' ? `<span class="btn btn-ghost" style="cursor:default">${a.command}</span>` : ''}
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap" style="--accent: ${a.color}">
+      <section class="sec">
+        <div class="sec-title">เกี่ยวกับ ${a.name}</div>
+        <div class="desc">${a.description.map(p => `<p>${p}</p>`).join('')}</div>
+      </section>
+
+      <section class="sec">
+        <div class="sec-title">ความสามารถ</div>
+        <ul class="cap">${caps}</ul>
+      </section>
+
+      <section class="sec">
+        <div class="sec-title">ตัวอย่างคำสั่ง (คลิกเพื่อเปิดใน Office)</div>
+        <div class="prompt-grid">${prompts}</div>
+      </section>
+
+      <section class="sec">
+        <div class="sec-title">คุยต่อกับใคร / Handoff</div>
+        <div class="desc"><p>${a.handoffs}</p></div>
+      </section>
+    </div>
+
+    <div class="others">
+      <div class="others-title">Specialist คนอื่น</div>
+      <div class="others-grid">${others}</div>
+    </div>
+  `;
+
+  // Mount pixel bot into stage
+  const stage = document.getElementById('botStage');
+  stage.appendChild(buildBot(id, a.color));
+}
+
+render();
+window.addEventListener('popstate', render);
+</script>
+
+</body>
+</html>
