@@ -1746,7 +1746,9 @@ function buildBotEl(id, color, klass) {
 /* ============================================================
    STATE (persistent)
    ============================================================ */
-const API = 'http://localhost:8000';
+const API = window.location.origin === 'null' || window.location.protocol === 'file:'
+  ? 'http://localhost:8000'
+  : window.location.origin;
 const STATS_KEY = 'neo_labs_stats_v2';
 
 // stats = { agentId: { tasks: N, lastAt: ts, lastMsg: str, models: {model: count} } }
