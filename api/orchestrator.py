@@ -84,7 +84,9 @@ async def orchestrate(
       {"type": "done",    "agent": <id>}
       {"type": "error",   "message": <str>}
     """
-    client = anthropic.AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    # Same sanitization as main.py — strip stray '=' / whitespace in paste'd env vars
+    _raw = os.getenv("ANTHROPIC_API_KEY") or ""
+    client = anthropic.AsyncAnthropic(api_key=_raw.strip().lstrip("=").strip())
 
     # Specialists list excludes the root so NEO can't delegate to itself
     specialist_ids = [a for a in agents_map.keys() if a != root_agent]

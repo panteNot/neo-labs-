@@ -13,6 +13,13 @@ import db
 
 load_dotenv()
 
+
+def anthropic_key() -> str:
+    """Read ANTHROPIC_API_KEY, stripping whitespace and any stray leading '='
+    that creeps in when users paste 'ANTHROPIC_API_KEY=...' into a value field."""
+    raw = os.getenv("ANTHROPIC_API_KEY") or ""
+    return raw.strip().lstrip("=").strip()
+
 # Sentry — error tracking (optional, skip if DSN not set)
 _sentry_dsn = os.getenv("SENTRY_DSN")
 if _sentry_dsn:
@@ -225,7 +232,10 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
         db.append_message(conv_id, "user", prompt, "")
 
     messages = history + [{"role": "user", "content": prompt}]
-    client = anthropic.AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    api_key = anthropic_key()
+    if not api_key.startswith("sk-"):
+        return {"error": "ANTHROPIC_API_KEY malformed — check Railway Variables (no leading '=' or spaces)"}
+    client = anthropic.AsyncAnthropic(api_key=api_key)
 
     async def generate():
         full = ""
@@ -398,7 +408,7 @@ async def generate_3d(request: Request, body: dict, user: dict = Depends(require
     prompt = (body.get("prompt") or "").strip()
     if not prompt:
         return {"error": "no prompt"}
-    client = anthropic.AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    client = anthropic.AsyncAnthropic(api_key=anthropic_key())
 
     async def generate():
         async with client.messages.stream(
