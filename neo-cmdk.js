@@ -30,6 +30,7 @@
     { group: 'Agents', id: 'a-quill', label: 'QUILL — Copywriter',           hint: 'call', icon: '⚪', color: '#e5e5e5', run: () => call('quill') },
 
     /* --- Actions --- */
+    { group: 'Actions', id: 'x-shortcuts', label: 'Show keyboard shortcuts', hint: '?', icon: '⌨', run: () => { if (window.NeoShortcuts) window.NeoShortcuts.open(); else toast('Shortcuts ยังไม่พร้อม'); } },
     { group: 'Actions', id: 'x-export',  label: 'Export conversation → Markdown', hint: '', icon: '↓', run: () => exportMD() },
     { group: 'Actions', id: 'x-theme',   label: 'Toggle theme (dark / light)', hint: '',  icon: '☾', run: () => toggleTheme() },
     { group: 'Actions', id: 'x-logout',  label: 'Log out',               hint: '⎋', icon: '↗', run: () => logout() },
