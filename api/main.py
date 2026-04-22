@@ -232,15 +232,28 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
         # Send conv_id to frontend in a header-like first line (JSON-prefixed)
         if conv_id:
             yield f"\u0000CONV:{conv_id}\u0000"
-        async with client.messages.stream(
-            model=model,
-            max_tokens=800,  # brief-by-default; long form costs money
-            system=AGENTS[agent],
-            messages=messages,
-        ) as stream:
-            async for text in stream.text_stream:
-                full += text
-                yield text
+        try:
+            async with client.messages.stream(
+                model=model,
+                max_tokens=800,  # brief-by-default; long form costs money
+                system=AGENTS[agent],
+                messages=messages,
+            ) as stream:
+                async for text in stream.text_stream:
+                    full += text
+                    yield text
+        except Exception as e:
+            # Surface stream errors to the frontend so the user sees WHY it failed
+            import traceback, sys
+            traceback.print_exc(file=sys.stderr)
+            if _sentry_dsn:
+                try:
+                    import sentry_sdk
+                    sentry_sdk.capture_exception(e)
+                except Exception:
+                    pass
+            yield f"\n\n⚠️ stream error: {type(e).__name__}: {str(e)[:300]}"
+            return
         if persist and conv_id and full:
             db.append_message(conv_id, "assistant", full, agent)
 
