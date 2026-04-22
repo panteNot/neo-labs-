@@ -147,6 +147,48 @@ def delete_conversation(conv_id: str) -> bool:
         return cur.rowcount > 0
 
 
+def search_conversations(q: str, limit: int = 50) -> list[dict]:
+    """Full-text-ish search across conversation titles AND message content.
+    Returns convs sorted by most-recently-updated, with a short snippet of the
+    first matching message (or title match if only the title hit)."""
+    q = (q or "").strip()
+    if not q:
+        return []
+    needle = f"%{q}%"
+    with conn() as c:
+        rows = c.execute(
+            """
+            SELECT DISTINCT c.id, c.title, c.agent, c.model, c.created_at, c.updated_at
+            FROM conversations c
+            LEFT JOIN messages m ON m.conv_id = c.id
+            WHERE c.title LIKE ? OR m.content LIKE ?
+            ORDER BY c.updated_at DESC
+            LIMIT ?
+            """,
+            (needle, needle, limit),
+        ).fetchall()
+        out = []
+        for r in rows:
+            conv = dict(r)
+            snip = c.execute(
+                "SELECT content FROM messages WHERE conv_id = ? AND content LIKE ? "
+                "ORDER BY created_at ASC LIMIT 1",
+                (conv["id"], needle),
+            ).fetchone()
+            if snip:
+                content = snip["content"]
+                idx = content.lower().find(q.lower())
+                start = max(0, idx - 40)
+                end = min(len(content), idx + len(q) + 80)
+                prefix = "…" if start > 0 else ""
+                suffix = "…" if end < len(content) else ""
+                conv["snippet"] = prefix + content[start:end] + suffix
+            else:
+                conv["snippet"] = ""
+            out.append(conv)
+        return out
+
+
 def rename_conversation(conv_id: str, title: str) -> bool:
     with conn() as c:
         cur = c.execute(

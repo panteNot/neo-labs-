@@ -398,6 +398,14 @@ def conversations_list(user: dict = Depends(require_auth)):
     return db.list_conversations()
 
 
+@app.get("/conversations/search")
+def conversations_search(q: str = "", user: dict = Depends(require_auth)):
+    q = (q or "").strip()[:200]
+    if not q:
+        return []
+    return db.search_conversations(q, limit=50)
+
+
 @app.get("/conversations/{conv_id}")
 def conversations_get(conv_id: str, user: dict = Depends(require_auth)):
     conv = db.get_conversation(conv_id)
