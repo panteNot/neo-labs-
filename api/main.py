@@ -290,6 +290,8 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
     client = anthropic.AsyncAnthropic(api_key=api_key)
     api_model = resolve_model(model)  # UI alias → real Anthropic model id
     user_email = (user or {}).get("email", "") if isinstance(user, dict) else ""
+    # Inject user-managed memory into system prompt (empty string if user has none)
+    system_prompt = AGENTS[agent] + db.get_memory_context(user_email)
     _t_start = int(time.time() * 1000)
 
     async def generate():
@@ -321,7 +323,7 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
             async with client.messages.stream(
                 model=api_model,
                 max_tokens=800,  # brief-by-default; long form costs money
-                system=AGENTS[agent],
+                system=system_prompt,
                 messages=messages,
             ) as stream:
                 stream_opened = True
@@ -492,6 +494,35 @@ def me_delete_all_conversations(user: dict = Depends(require_auth)):
     n = db.delete_all_conversations()
     db.log_audit(email, "data_wipe", meta=f"deleted={n}")
     return {"deleted": n}
+
+
+# ============================================================
+# MEMORY — user-managed facts auto-injected into every /chat system prompt
+# ============================================================
+@app.get("/me/memory")
+def me_memory_list(user: dict = Depends(require_auth)):
+    email = (user or {}).get("email", "") if isinstance(user, dict) else ""
+    return db.list_memory(email)
+
+
+@app.post("/me/memory")
+def me_memory_add(body: dict, user: dict = Depends(require_auth)):
+    email = (user or {}).get("email", "") if isinstance(user, dict) else ""
+    content = (body.get("content") or "").strip()
+    category = (body.get("category") or "general").strip()
+    if not content:
+        return {"error": "content required"}
+    mem_id = db.add_memory(email, content, category)
+    db.log_audit(email, "memory_add", meta=f"id={mem_id}, cat={category}")
+    return {"id": mem_id}
+
+
+@app.delete("/me/memory/{mem_id}")
+def me_memory_delete(mem_id: int, user: dict = Depends(require_auth)):
+    email = (user or {}).get("email", "") if isinstance(user, dict) else ""
+    ok = db.delete_memory(mem_id, email)
+    db.log_audit(email, "memory_delete", meta=str(mem_id))
+    return {"ok": ok}
 
 
 @app.get("/admin/stats")

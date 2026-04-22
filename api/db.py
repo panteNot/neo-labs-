@@ -50,6 +50,16 @@ CREATE TABLE IF NOT EXISTS audit_log (
 CREATE INDEX IF NOT EXISTS idx_audit_ts ON audit_log(ts DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action, ts DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_email, ts DESC);
+
+CREATE TABLE IF NOT EXISTS user_memory (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_email TEXT NOT NULL DEFAULT '',
+  category   TEXT NOT NULL DEFAULT 'general',
+  content    TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  pinned     INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_mem_user ON user_memory(user_email, created_at DESC);
 """
 
 
@@ -314,6 +324,75 @@ def audit_recent(limit: int = 50) -> list[dict]:
             (limit,),
         ).fetchall()
         return [dict(r) for r in rows]
+
+
+# ============================================================
+# USER MEMORY — user-managed facts injected into every /chat system prompt.
+# Lite version (no vector DB): keyword-free, just list + join.
+# ============================================================
+MEM_MAX_ROWS = 50      # hard cap per user — keeps system prompt bounded
+MEM_MAX_CONTENT = 500  # per-entry char cap
+
+
+def add_memory(user_email: str, content: str, category: str = "general") -> int:
+    content = (content or "").strip()[:MEM_MAX_CONTENT]
+    if not content:
+        return 0
+    with conn() as c:
+        # Enforce per-user cap: oldest-unpinned rows are trimmed first
+        n = c.execute(
+            "SELECT COUNT(*) n FROM user_memory WHERE user_email = ?",
+            (user_email or "",),
+        ).fetchone()["n"]
+        if n >= MEM_MAX_ROWS:
+            c.execute(
+                "DELETE FROM user_memory WHERE id IN ("
+                "SELECT id FROM user_memory WHERE user_email = ? AND pinned = 0 "
+                "ORDER BY created_at ASC LIMIT ?)",
+                (user_email or "", n - MEM_MAX_ROWS + 1),
+            )
+        cur = c.execute(
+            "INSERT INTO user_memory(user_email, category, content, created_at) "
+            "VALUES(?, ?, ?, ?)",
+            (user_email or "", (category or "general")[:40], content, now_ms()),
+        )
+        return cur.lastrowid
+
+
+def list_memory(user_email: str, limit: int = 100) -> list[dict]:
+    with conn() as c:
+        rows = c.execute(
+            "SELECT id, category, content, created_at, pinned "
+            "FROM user_memory WHERE user_email = ? "
+            "ORDER BY pinned DESC, created_at DESC LIMIT ?",
+            (user_email or "", limit),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+
+def delete_memory(mem_id: int, user_email: str) -> bool:
+    with conn() as c:
+        cur = c.execute(
+            "DELETE FROM user_memory WHERE id = ? AND user_email = ?",
+            (mem_id, user_email or ""),
+        )
+        return cur.rowcount > 0
+
+
+def get_memory_context(user_email: str) -> str:
+    """Return a formatted block to append to an agent system prompt, or ''."""
+    if not user_email:
+        return ""
+    rows = list_memory(user_email, limit=MEM_MAX_ROWS)
+    if not rows:
+        return ""
+    lines = [f"- {r['content']}" for r in rows]
+    return (
+        "\n\n---\n"
+        "**🧠 User Memory (ข้อเท็จจริงที่บอสให้จำไว้):**\n"
+        + "\n".join(lines)
+        + "\nใช้เป็นบริบทตอบให้ตรงกับบอสมากขึ้น — ไม่ต้องอ้างอิงตรงๆ ถ้าไม่เกี่ยว"
+    )
 
 
 init()

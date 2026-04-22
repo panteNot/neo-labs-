@@ -232,6 +232,35 @@ html[data-theme="light"] .row .lbl { color: #0f0f1a; }
     </div>
   </div>
 
+  <!-- Memory -->
+  <div class="section-title">🧠 My Memory</div>
+  <div class="panel">
+    <div style="font-size:12px; color:var(--muted); line-height:1.5; margin-bottom:14px;">
+      ข้อเท็จจริงที่บอสอยากให้ NEO &amp; specialists จำไว้ — ถูก inject เข้า system prompt ทุก <code style="background:var(--bg-2);padding:2px 6px;border-radius:3px;">/chat</code> call<br>
+      <span style="opacity:.7;">ใช้สั้นๆ เช่น "บอสชอบ code สั้น", "บริษัทชื่อ XYZ", "ใช้ Thai เป็น default"</span>
+    </div>
+    <div style="display:flex; gap:8px; margin-bottom:14px;">
+      <input id="memInput" type="text" maxlength="500"
+        placeholder="เพิ่ม fact ใหม่..."
+        style="flex:1; background:var(--bg-2); border:1px solid var(--line-2);
+               color:var(--fg); padding:9px 12px; border-radius:8px;
+               font:13px/1 inherit; font-family:'Prompt',sans-serif;" />
+      <select id="memCategory"
+        style="background:var(--bg-2); border:1px solid var(--line-2); color:var(--fg);
+               padding:0 10px; border-radius:8px; font:12px/1 inherit; cursor:pointer;">
+        <option value="general">general</option>
+        <option value="preference">preference</option>
+        <option value="project">project</option>
+        <option value="fact">fact</option>
+      </select>
+      <button class="btn primary" id="memAddBtn">+ Add</button>
+    </div>
+    <div id="memList" style="display:flex; flex-direction:column; gap:8px;"></div>
+    <div id="memEmpty" style="font-size:12px; color:var(--muted); text-align:center; padding:18px 0; display:none;">
+      ยังไม่มี memory — เพิ่ม fact แรกได้เลย
+    </div>
+  </div>
+
   <!-- Data -->
   <div class="section-title">My Data</div>
   <div class="panel">
@@ -383,8 +412,80 @@ document.getElementById('wipeDataBtn').addEventListener('click', async (e) => {
   }
 });
 
+/* ---------- Memory ---------- */
+const memList = document.getElementById('memList');
+const memEmpty = document.getElementById('memEmpty');
+const memInput = document.getElementById('memInput');
+const memCategory = document.getElementById('memCategory');
+
+function escHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadMemory() {
+  try {
+    const res = await fetch(`${API}/me/memory`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    memList.innerHTML = '';
+    if (!rows.length) { memEmpty.style.display = 'block'; return; }
+    memEmpty.style.display = 'none';
+    for (const r of rows) {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex; gap:10px; align-items:flex-start; padding:10px 12px; background:var(--bg-2); border:1px solid var(--line); border-radius:8px;';
+      div.innerHTML = `
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:10px; color:var(--nova); font-family:'JetBrains Mono',monospace; letter-spacing:1px; margin-bottom:3px;">${escHtml(r.category || 'general').toUpperCase()}</div>
+          <div style="font-size:13px; color:var(--fg); line-height:1.5; word-wrap:break-word;">${escHtml(r.content)}</div>
+        </div>
+        <button class="btn danger" data-id="${r.id}" style="flex-shrink:0; padding:5px 10px; font-size:11px;">✗</button>
+      `;
+      div.querySelector('button').addEventListener('click', () => deleteMemory(r.id));
+      memList.appendChild(div);
+    }
+  } catch (err) {
+    toast('Load memory failed: ' + err.message, 'err');
+  }
+}
+
+async function addMemory() {
+  const content = memInput.value.trim();
+  if (!content) return;
+  try {
+    const res = await fetch(`${API}/me/memory`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, category: memCategory.value }),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    memInput.value = '';
+    toast('Saved', 'ok');
+    loadMemory();
+  } catch (err) {
+    toast('Add failed: ' + err.message, 'err');
+  }
+}
+
+async function deleteMemory(id) {
+  if (!confirm('ลบ memory นี้?')) return;
+  try {
+    const res = await fetch(`${API}/me/memory/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    toast('Deleted', 'ok');
+    loadMemory();
+  } catch (err) {
+    toast('Delete failed: ' + err.message, 'err');
+  }
+}
+
+document.getElementById('memAddBtn').addEventListener('click', addMemory);
+memInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addMemory(); });
+
 /* ---------- Init ---------- */
 fillProfile();
+loadMemory();
 syncThemeUI();
 new MutationObserver(syncThemeUI).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 </script>
