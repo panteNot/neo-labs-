@@ -9,7 +9,11 @@ from slowapi.errors import RateLimitExceeded
 from slowapi import _rate_limit_exceeded_handler
 from auth import require_auth, require_auth_or_hook, limiter
 import asyncio, json, os, time, anthropic
+from datetime import datetime, timezone, timedelta
 import db
+
+# Bangkok is UTC+7 year-round (no DST) — avoid zoneinfo/tzdata dep on Railway
+BKK_TZ = timezone(timedelta(hours=7))
 
 load_dotenv()
 
@@ -290,8 +294,18 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
     client = anthropic.AsyncAnthropic(api_key=api_key)
     api_model = resolve_model(model)  # UI alias → real Anthropic model id
     user_email = (user or {}).get("email", "") if isinstance(user, dict) else ""
-    # Inject user-managed memory into system prompt (empty string if user has none)
-    system_prompt = AGENTS[agent] + db.get_memory_context(user_email)
+    # Inject current date (Bangkok TZ) + user memory into system prompt.
+    # Date awareness fixes "NEO doesn't know what year it is" — stale knowledge
+    # cutoff was confusing friends who asked about live data.
+    now_bkk = datetime.now(BKK_TZ)
+    date_ctx = (
+        f"<current_context>\n"
+        f"  วันนี้: {now_bkk.strftime('%A %d %B %Y')} (BKK)\n"
+        f"  เวลา: {now_bkk.strftime('%H:%M')} ICT\n"
+        f"  คุณมี web_search tool — ใช้ได้เมื่อบอสถามข้อมูล live/ปัจจุบัน (ราคาหุ้น, ข่าว, วันนี้, เหตุการณ์ล่าสุด). max 3 ครั้งต่อคำถาม\n"
+        f"</current_context>\n\n"
+    )
+    system_prompt = date_ctx + AGENTS[agent] + db.get_memory_context(user_email)
     _t_start = int(time.time() * 1000)
 
     async def generate():
@@ -322,9 +336,17 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
         try:
             async with client.messages.stream(
                 model=api_model,
-                max_tokens=800,  # brief-by-default; long form costs money
+                max_tokens=1200,  # raised from 800 — web_search result + synthesis needs headroom
                 system=system_prompt,
                 messages=messages,
+                # Anthropic built-in web search — server-side tool (no local
+                # execution needed). Capped at 3 uses per message to protect
+                # budget: $10 / 1000 searches ≈ $0.01 per /chat if fully used.
+                tools=[{
+                    "type": "web_search_20250305",
+                    "name": "web_search",
+                    "max_uses": 3,
+                }],
             ) as stream:
                 stream_opened = True
                 async for text in stream.text_stream:
