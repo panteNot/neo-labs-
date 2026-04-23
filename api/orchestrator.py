@@ -125,7 +125,17 @@ async def orchestrate(
                     if model.startswith("claude-opus-4-7")
                     else {"type": "enabled", "budget_tokens": 5000}
                 )
-            resp = await client.messages.create(**root_kwargs)
+            try:
+                resp = await client.messages.create(**root_kwargs)
+            except TypeError as te:
+                # Older anthropic SDKs don't accept `thinking` kwarg — strip it
+                # and retry once so production keeps streaming instead of 500ing.
+                # Real fix is bumping the SDK; this is belt-and-suspenders.
+                if "thinking" in str(te) and "thinking" in root_kwargs:
+                    root_kwargs.pop("thinking", None)
+                    resp = await client.messages.create(**root_kwargs)
+                else:
+                    raise
         except Exception as e:
             yield {"type": "error", "message": f"root call failed: {e}"}
             return
