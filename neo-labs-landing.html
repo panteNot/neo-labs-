@@ -464,7 +464,7 @@ footer {
 </footer>
 
 <script>
-/* ========== DATA: 9 agents (same as main app) ========== */
+/* ========== DATA: 12 agents (same as main app) ========== */
 const CHARS = [
   { id:'neo',   name:'NEO',   color:'#ff6b35', role:'CEO' },
   { id:'atlas', name:'ATLAS', color:'#14b8a6', role:'Chief of Staff' },
@@ -475,6 +475,9 @@ const CHARS = [
   { id:'rex',   name:'REX',   color:'#ef4444', role:"Devil's Advocate" },
   { id:'byte',  name:'BYTE',  color:'#3b82f6', role:'Code Reviewer' },
   { id:'quill', name:'QUILL', color:'#e5e5e5', role:'Copywriter' },
+  { id:'zara',  name:'ZARA',  color:'#d946ef', role:'Growth Marketer' },
+  { id:'ghost', name:'GHOST', color:'#64748b', role:'Security Researcher' },
+  { id:'forge', name:'FORGE', color:'#0ea5e9', role:'DevOps / Shipping' },
 ];
 
 const BODY = [
@@ -496,6 +499,9 @@ const FACES = {
   rex:   { eye:[[4,2],[5,3],[5,8],[4,9]], mouth:[[7,3],[6,4],[7,5],[6,6],[7,7],[6,8]] },
   byte:  { eye:[[4,2],[4,3],[5,2],[5,3],[4,8],[4,9],[5,8],[5,9]], mouth:[[7,3],[7,5],[7,7]] },
   quill: { eye:[[4,3],[5,3],[5,7],[5,8],[5,9]], mouth:[[7,4],[7,5],[7,6],[6,7]] },
+  zara:  { eye:[[4,2],[4,3],[5,3],[4,8],[4,9],[5,8]], mouth:[[7,3],[7,4],[7,5],[7,6],[7,7],[7,8]] },
+  ghost: { eye:[[4,3],[4,8]], mouth:[[7,5],[7,6]] },
+  forge: { eye:[[4,2],[4,3],[5,2],[5,3],[4,8],[4,9],[5,8],[5,9]], mouth:[[7,3],[7,4],[7,5],[7,6],[7,7],[7,8]] },
 };
 
 function makeBot(id, big) {

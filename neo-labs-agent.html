@@ -24,6 +24,9 @@
     --rex: #ef4444;
     --byte: #3b82f6;
     --quill: #e5e5e5;
+    --zara: #d946ef;
+    --ghost: #64748b;
+    --forge: #0ea5e9;
   }
   html[data-theme="light"] {
     --bg: #fafafa; --bg-2: #ffffff; --fg: #1a1a22;
@@ -141,6 +144,28 @@
   }
   html[data-theme="light"] ul.cap li { background: rgba(0,0,0,0.03); }
 
+  /* ============ PLATFORM FEATURES ============ */
+  .pf-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .pf-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: background .15s, border-color .15s;
+  }
+  html[data-theme="light"] .pf-item { background: rgba(0,0,0,0.02); }
+  .pf-item:hover { background: rgba(255,255,255,0.04); border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
+  html[data-theme="light"] .pf-item:hover { background: rgba(0,0,0,0.04); }
+  .pf-icon { font-size: 18px; flex-shrink: 0; padding-top: 2px; line-height: 1; }
+  .pf-body { flex: 1; min-width: 0; }
+  .pf-name { font-size: 13px; font-weight: 600; color: var(--fg); margin-bottom: 4px; }
+  .pf-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  ul.cap li b { color: var(--accent); font-weight: 600; }
+
   .prompt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
   .prompt-card {
     padding: 14px 16px;
@@ -252,6 +277,23 @@
    AGENT DATA — detailed profile for each specialist
    Built from CLAUDE.md team roster + .claude/agents/ briefs.
    ============================================================ */
+/* Platform-wide features available in every conversation,
+   regardless of which agent you're talking to. */
+const PLATFORM_FEATURES = [
+  { icon: '🧠', name: 'DEEP THINK (Extended Thinking)', desc: 'เปิด Extended Thinking mode สำหรับปัญหาซับซ้อน — agent จะคิดละเอียดขึ้นก่อนตอบ (toggle ใน topbar)' },
+  { icon: '🌐', name: 'Web Search + Current Date', desc: 'ทุก agent สามารถค้นข้อมูลจาก web ได้แบบ real-time + รู้วันที่ปัจจุบัน (ข้าม knowledge cutoff)' },
+  { icon: '🧩', name: 'Agent Memory Lite', desc: 'จดจำ fact ของบอส (ชื่อ, preference, project) — inject เข้า system prompt ทุก session' },
+  { icon: '📎', name: 'File Upload (Vision)', desc: 'แนบรูป / PDF ให้ agent วิเคราะห์ — Claude Vision อ่าน image + screenshot + diagram ได้' },
+  { icon: '💬', name: 'Conversation History + Search', desc: 'บันทึก chat ทุก session ต่อผู้ใช้ + full-text search ทั้ง title และ message body' },
+  { icon: '📌', name: 'Prompt Library', desc: 'เก็บ prompt ที่ใช้บ่อยไว้ reuse (localStorage) — ⌘+Shift+P เรียก' },
+  { icon: '🎭', name: 'DELEGATE (Multi-agent Orchestration)', desc: 'NEO ตัดสินใจ delegate ไปยัง specialist อัตโนมัติ (ปุ่ม 🎭 TEAM ใน office)' },
+  { icon: '👥', name: 'COUNCIL (Parallel Streaming)', desc: '3+ agent ตอบพร้อมกันใน split view — เห็นหลายมุมมองใน 1 หน้าจอ' },
+  { icon: '⌨', name: 'Keyboard Shortcuts', desc: 'กด ? ใน office เพื่อดู shortcut ทั้งหมด (⌘K palette, ⌘H history, ⌘N new chat ฯลฯ)' },
+  { icon: '⚙', name: 'Settings + Data Export', desc: 'หน้า settings: profile, preferences, export data เป็น markdown/JSON, danger zone' },
+  { icon: '🎨', name: 'Dark/Light Theme', desc: 'Toggle dark/light mode (☾/☀ FAB) — sync ข้าม tab' },
+  { icon: '📝', name: 'Artifacts Panel', desc: 'Detect fenced code block อัตโนมัติ → เปิด slide-in panel พร้อม preview (HTML ใน sandbox), Copy, Download' },
+];
+
 const AGENTS = {
   neo: {
     name: 'NEO',
@@ -264,11 +306,14 @@ const AGENTS = {
       'บุคลิก: Strict Manager + Witty Friend + Proud Mentor — ไม่มี fluff, เข้าเรื่องทันที, ตอบภาษาไทยปนศัพท์เทคนิค English, เรียก "บอส" เสมอ'
     ],
     capabilities: [
-      'Force Clarity — สั่งงานคลุมเครือ ต้องถามให้ชัดก่อนทำ',
-      'Stop Bad Ideas — เห็นบอสจะเดินลงเหว ขวางทันทีพร้อมเหตุผล',
-      'Scope Control — เตือนและประเมิน impact ก่อนเพิ่ม feature',
-      'Decision Deadline — ลังเลนาน → propose ทางเลือก พร้อม recommend 1 อัน',
-      'Celebrate Wins — บันทึก lesson learned เมื่อสำเร็จเป้าหมาย'
+      '🎯 <b>Force Clarity</b> — สั่งงานคลุมเครือ ต้องถามให้ชัดก่อนทำ',
+      '🛑 <b>Stop Bad Ideas</b> — เห็นบอสจะเดินลงเหว ขวางทันทีพร้อมเหตุผล',
+      '📏 <b>Scope Control</b> — เตือนและประเมิน impact ก่อนเพิ่ม feature',
+      '⏱ <b>Decision Deadline</b> — ลังเลนาน → propose ทางเลือก พร้อม recommend 1 อัน',
+      '🏆 <b>Celebrate Wins</b> — บันทึก lesson learned เมื่อสำเร็จเป้าหมาย',
+      '🧭 <b>Triage & Delegate</b> — ประเมินงานแล้วเรียก specialist ที่ใช่ (ATLAS/NOVA/LUNA/ฯลฯ)',
+      '💬 <b>Daily Brief</b> — สรุปสถานการณ์ + สิ่งที่ควรทำวันนี้ (/brief)',
+      '🇹🇭 <b>Bilingual</b> — ตอบไทย technical term ใช้ English, เข้าใจ slang ทั้งสองภาษา'
     ],
     examplePrompts: [
       'ขอคุยเล่นๆ',
@@ -290,11 +335,15 @@ const AGENTS = {
       'ใช้เมื่องานใหญ่เกินกว่าจะทำในช็อตเดียว ต้องมีการจัด priority และ track progress'
     ],
     capabilities: [
-      'Break down งานใหญ่เป็น checklist ที่ actionable',
-      'ประเมิน scope / impact / timeline (ชั่วโมง/วัน)',
-      'จัด priority: must-have vs nice-to-have',
-      'ตัดสินใจ delegate ไปยัง specialist คนไหน',
-      'ขอ status report ระหว่างทาง'
+      '📋 <b>Work breakdown</b> — แตกงานใหญ่เป็น checklist actionable (sub-tasks ≤ 2 ชม./อัน)',
+      '⏱ <b>Scope / Impact / Timeline estimation</b> — ประเมินเวลาเป็นชั่วโมง/วัน พร้อม assumption',
+      '🎯 <b>Prioritization</b> — Must-have vs Nice-to-have, MoSCoW framework',
+      '📊 <b>Risk analysis</b> — ระบุ risk + mitigation พร้อม probability × impact',
+      '🚦 <b>Blocker identification</b> — สิ่งที่ต้องรู้/ทำก่อน start (prerequisite tree)',
+      '👥 <b>Delegation routing</b> — เลือก agent ที่ fit ที่สุดสำหรับ sub-task แต่ละอัน',
+      '📈 <b>Status reports</b> — สรุปความคืบหน้า % complete + next steps + blockers',
+      '📅 <b>Sprint planning</b> — จัด task เข้า sprint 1-2 สัปดาห์ เว้น buffer 20%',
+      '📝 <b>PROJECT_STATUS.md integration</b> — update file tracking อัตโนมัติ'
     ],
     examplePrompts: [
       'วางแผน project X',
@@ -317,11 +366,15 @@ const AGENTS = {
       'เหมาะกับงานที่ต้องรู้ก่อนทำ — เปรียบเทียบ framework/tool, วิเคราะห์ตลาด, เจาะลึก concept, fact-check ข้อมูล'
     ],
     capabilities: [
-      'WebSearch/WebFetch ดึงข้อมูลล่าสุด (ข้าม knowledge cutoff)',
-      'เปรียบเทียบ option หลายตัว พร้อม pros/cons',
-      'Fact-check — verify ข้อมูลจาก source หลายที่',
-      'สรุปบทความ/paper ยาวๆ เป็นประเด็นหลัก',
-      'Market analysis, competitor research'
+      '🌐 <b>Real-time web search + fetch</b> — ดึงข้อมูลสด ข้าม knowledge cutoff',
+      '⚖ <b>Side-by-side comparison</b> — framework / tool / product พร้อม pros/cons table',
+      '✅ <b>Fact-check / verify</b> — cross-reference จาก 3+ source ระบุ confidence level',
+      '📄 <b>PDF / paper summary</b> — อ่าน academic paper เป็นประเด็นหลัก + citation',
+      '📊 <b>Market analysis</b> — TAM/SAM/SOM, competitor landscape, pricing research',
+      '📈 <b>Trend research</b> — hype cycle, adoption curve, Google Trends data',
+      '🔬 <b>Deep dive</b> — concept ซับซ้อน → breakdown เข้าใจง่าย พร้อม source ทุกคำอ้าง',
+      '💰 <b>Pricing intelligence</b> — compare SaaS tier, volume discount, hidden cost',
+      '🗣 <b>Expert quotes</b> — หา quote จาก engineer/researcher ดังๆ ใน topic นั้น'
     ],
     examplePrompts: [
       'ควรใช้ React หรือ Vue',
@@ -344,12 +397,17 @@ const AGENTS = {
       'Design constraints: mobile-first max-width 480px, dark mode default, ใช้ CSS variable tokens, standalone file'
     ],
     capabilities: [
-      'Wireframe / mockup / prototype เป็น HTML+CSS จริง',
-      'Design critique — ชี้จุดที่ควรปรับ',
-      'Landing page / marketing page',
-      'App screen (login, dashboard, settings ฯลฯ)',
-      'Component design (button, card, modal)',
-      'ถามเพื่อ clarify audience/goal/constraints ก่อนลงมือ'
+      '🖼 <b>Wireframe / Mockup / Prototype</b> — ส่งเป็น HTML+CSS ที่เปิด browser ได้ทันที',
+      '🎨 <b>Design critique</b> — วิจารณ์ design ตาม Gestalt + hierarchy + contrast',
+      '🌐 <b>Landing pages</b> — marketing site พร้อม hero + features + CTA + social proof',
+      '📱 <b>App screens</b> — login, dashboard, settings, chat, onboarding flow',
+      '🧱 <b>Component library</b> — button, card, modal, form, table (design system tokens)',
+      '🎯 <b>Mobile-first responsive</b> — breakpoint 480/768/1024, touch target ≥ 44px',
+      '🌓 <b>Dark mode design</b> — palette + contrast ratio ≥ 7:1 สำหรับ body text',
+      '♿ <b>Accessibility (WCAG AA)</b> — keyboard nav, ARIA label, alt text, focus ring',
+      '🔷 <b>Figma integration</b> — อ่าน Figma URL ผ่าน MCP, convert design → code',
+      '✨ <b>3D / Motion UI</b> — scroll animation, parallax, hero cinematic (GSAP ready)',
+      '❓ <b>Discovery questions</b> — ถาม audience / goal / constraint ก่อนลงมือ'
     ],
     examplePrompts: [
       'ออกแบบหน้า login',
@@ -372,11 +430,17 @@ const AGENTS = {
       'เหมาะกับการ present อาจารย์ / investor / ทีม — เน้น clear message ต่อหน้า, visual hierarchy ชัด'
     ],
     capabilities: [
-      'Pitch deck (investor / competition)',
-      'Explainer deck (สอน concept)',
-      'Academic presentation',
-      'Sales deck',
-      'One-slide-one-idea rule, minimal text'
+      '💼 <b>Pitch deck</b> — investor / competition / hackathon (10-15 หน้า)',
+      '🎓 <b>Explainer deck</b> — สอน concept ทีละ step (Feynman-style)',
+      '👨‍🏫 <b>Academic presentation</b> — slide ขึ้น project / thesis defense',
+      '💰 <b>Sales deck</b> — B2B/B2C พร้อม problem/solution/ROI frame',
+      '📋 <b>Meeting deck</b> — weekly review, sprint retro, quarterly update',
+      '📐 <b>1 slide = 1 idea</b> — rule enforce ทุก deck',
+      '🎨 <b>Visual hierarchy</b> — font scale, spacing, color contrast',
+      '🖼 <b>Image sourcing</b> — placeholder + description สำหรับ visual หลัก',
+      '🔁 <b>Canva integration</b> — ส่งออกเป็น Canva design ผ่าน MCP',
+      '🎬 <b>3D / Animation decks</b> — slide ที่เคลื่อนไหวได้ (reveal.js / custom)',
+      '📝 <b>Speaker notes</b> — script สำหรับแต่ละหน้า (30 วิ/หน้า)'
     ],
     examplePrompts: [
       'ทำ slide pitch 10 หน้า',
@@ -398,11 +462,16 @@ const AGENTS = {
       'เชื่อมเรื่องใหม่เข้ากับความรู้เดิมที่บอสมีอยู่ (spaced repetition + active recall)'
     ],
     capabilities: [
-      'สรุป PDF / บทความยาวๆ',
-      'อธิบาย concept ยากด้วยตัวอย่างง่าย',
-      'สร้าง flashcard (Q&A format)',
-      'ออก quiz / ข้อสอบ',
-      'เชื่อม topic ใหม่กับ knowledge base เดิม'
+      '📄 <b>PDF / paper summary</b> — อ่านไฟล์ยาวๆ สรุปเป็นประเด็นหลัก + TL;DR',
+      '💡 <b>Concept explanation</b> — อธิบาย Feynman-style ด้วยตัวอย่างในชีวิตประจำวัน',
+      '🎴 <b>Flashcards</b> — Q&A format, Anki-ready (export csv/txt)',
+      '📝 <b>Quiz / exam generation</b> — multiple choice, short answer, essay prompt',
+      '🧠 <b>Knowledge graph</b> — เชื่อม topic ใหม่กับ concept ที่บอสรู้อยู่',
+      '🎯 <b>Spaced repetition plan</b> — review schedule (1d/3d/7d/30d)',
+      '📚 <b>Study plan builder</b> — prep สำหรับสอบ/cert ภายใน N วัน',
+      '🗒 <b>Cornell notes format</b> — 3-column structured notes',
+      '❓ <b>Socratic questioning</b> — ถามให้บอสค้นพบคำตอบเอง แทนบอกตรงๆ',
+      '📊 <b>Progress tracking</b> — บันทึก learning milestone ข้าม session'
     ],
     examplePrompts: [
       'สรุป PDF นี้',
@@ -425,11 +494,16 @@ const AGENTS = {
       'ไม่ได้มาเพื่อ support — มาเพื่อท้าทาย. ใช้ก่อน commit resource/time/money'
     ],
     capabilities: [
-      'หา edge case / failure mode',
-      'Red-team critique (attack the plan)',
-      'ชี้ risk ที่มองข้าม',
-      'Compare: "ถ้าทำแบบนี้แทนล่ะ?"',
-      'Ask hard questions: "แล้วถ้า...?"'
+      '💥 <b>Edge case hunting</b> — หา scenario ที่ user/system break',
+      '🧨 <b>Failure mode analysis</b> — FMEA: จะพังได้ยังไงบ้าง + consequence',
+      '🏴 <b>Red-team critique</b> — attack the plan เหมือนเป็นศัตรู',
+      '⚠ <b>Hidden risk surfacing</b> — บอส tunnel vision → REX จะเห็นสิ่งที่ถูกมองข้าม',
+      '🔄 <b>Alternative framings</b> — "ทำแบบนี้แทนล่ะ?" / "อะไรจะเกิดถ้า..."',
+      '🎯 <b>Premortem analysis</b> — สมมติพังแล้ว → ไปหาว่าทำไม',
+      '⚖ <b>Assumption challenging</b> — "ที่บอสเชื่อว่า X จริงเหรอ?" พร้อม counter-evidence',
+      '📉 <b>Pareto attack</b> — 20% ของจุดอ่อน ทำให้พัง 80%',
+      '🧪 <b>Devils advocate mode</b> — defend position ตรงข้ามเพื่อ stress-test',
+      '🛡 <b>Not to confirm, to challenge</b> — ไม่ได้มา support, มาเพื่อท้าทาย'
     ],
     examplePrompts: [
       'ไอเดียนี้ดีมั้ย หาจุดอ่อนให้หน่อย',
@@ -452,11 +526,17 @@ const AGENTS = {
       'เจาะจง OWASP Top 10, command injection, XSS, SQL injection, secrets leak'
     ],
     capabilities: [
-      'Code review (correctness + style)',
-      'Security audit (OWASP Top 10)',
-      'หา bug ที่ซ่อนอยู่',
-      'แนะนำ refactor ให้สะอาดขึ้น',
-      'ประเมิน code quality / complexity'
+      '🔍 <b>Code review</b> — correctness + style + readability + maintainability',
+      '🛡 <b>Security audit</b> — OWASP Top 10 (XSS, SQLi, CSRF, SSRF, RCE, IDOR)',
+      '🐛 <b>Bug hunting</b> — off-by-one, race condition, null deref, leak',
+      '♻ <b>Refactoring suggestions</b> — DRY, SOLID, early return, extract function',
+      '📊 <b>Complexity analysis</b> — cyclomatic / cognitive complexity scoring',
+      '🔐 <b>Secrets / credentials scan</b> — API key, password, token ใน commit',
+      '⚡ <b>Performance review</b> — N+1 query, unnecessary re-render, memory leak',
+      '🧪 <b>Test coverage analysis</b> — สิ่งที่ควร test + edge case ที่หายไป',
+      '📜 <b>Convention enforcement</b> — naming, file structure, commit message',
+      '🚨 <b>CVE awareness</b> — check dependency สำหรับ known vulnerabilities',
+      '✍ <b>Fix suggestions</b> — ไม่ใช่แค่ชี้ปัญหา — เสนอ diff ที่แก้ได้'
     ],
     examplePrompts: [
       'review code ก่อน commit',
@@ -479,12 +559,17 @@ const AGENTS = {
       'เหมาะกับงานที่ต้องเขียนให้ hit — ไม่ใช่แค่ descriptive'
     ],
     capabilities: [
-      'Blog post / article',
-      'Social caption (IG, FB, Threads)',
-      'Tweet thread (viral format)',
-      'Landing page copy (headline + CTA)',
-      'Email (cold outreach / newsletter)',
-      'Product description / UX copy'
+      '📝 <b>Blog post / article</b> — 800-2000 words, SEO-ready with meta description',
+      '📸 <b>Social caption</b> — IG, FB, Threads, LinkedIn (tone + length ต่าง platform)',
+      '🧵 <b>Tweet thread</b> — viral format: hook → story → payoff (5-15 tweets)',
+      '🎯 <b>Landing page copy</b> — hero headline + subhead + CTA + objection handling',
+      '📧 <b>Email copy</b> — cold outreach, newsletter, sales funnel, re-engagement',
+      '🏷 <b>Product description</b> — e-commerce, UX micro-copy, error messages',
+      '🎬 <b>Video script</b> — TikTok/Reels/YouTube (15s/30s/60s format)',
+      '🇹🇭 <b>Bilingual (TH + EN)</b> — ไทยไม่ชวนคลื่นเหียน, English ไม่เชย',
+      '🎭 <b>Tone calibration</b> — professional / casual / edgy / luxury / friendly',
+      '🪝 <b>Hook generation</b> — เปิด 10 hook ให้เลือก ก่อนเขียน body',
+      '📏 <b>Show, don\'t tell</b> — ตัด fluff, ใส่ specific detail, concrete example'
     ],
     examplePrompts: [
       'เขียน caption Instagram สำหรับ post นี้',
@@ -494,6 +579,105 @@ const AGENTS = {
       'email ขายของให้ customer'
     ],
     handoffs: 'QUILL เขียน copy → LUNA นำไปใส่ใน design, PIXEL ใช้ใน slide'
+  },
+
+  zara: {
+    name: 'ZARA',
+    role: 'Growth Marketer',
+    color: 'var(--zara)',
+    command: '/growth',
+    tagline: 'นักการตลาดโต — launch plan, paid ads, funnel, SEO, retention — metric-driven ทุกอย่าง',
+    description: [
+      'ZARA คือ growth marketer ของ NEO Labs — โฟกัสที่การทำให้ product โตด้วย data ไม่ใช่ gut feeling',
+      'เหมาะกับงานที่เกี่ยวกับการหา user, activate, retain, monetize — AARRR funnel ทุก stage'
+    ],
+    capabilities: [
+      '🚀 <b>Launch plan 30/60/90 วัน</b> — pre-launch → launch day → post-launch playbook',
+      '🔍 <b>SEO keyword research</b> — pillar page + content cluster + internal linking',
+      '💰 <b>Paid ads</b> — Google / Meta / TikTok copy + targeting + budget allocation',
+      '🎯 <b>Funnel design (AARRR)</b> — Acquisition → Activation → Retention → Revenue → Referral',
+      '📧 <b>Email sequence automation</b> — welcome, onboarding, win-back, abandoned cart',
+      '🔄 <b>Growth loops</b> — viral / paid / content / PLG (product-led growth)',
+      '📊 <b>Retention analysis</b> — cohort analysis, churn prediction, NPS tracking',
+      '🧪 <b>A/B testing</b> — hypothesis → variant → statistical significance → rollout',
+      '👥 <b>Community building</b> — Discord / Twitter / email list strategy',
+      '🏆 <b>Launch day playbook</b> — ProductHunt, Hacker News, Reddit timing + tactics'
+    ],
+    examplePrompts: [
+      'วางแผน launch 30 วันสำหรับ product X',
+      'SEO keyword สำหรับ blog หัวข้อ AI',
+      'Copy ads Facebook สำหรับ signup funnel',
+      'Email sequence 5 emails onboarding',
+      'วิเคราะห์ retention จาก cohort data'
+    ],
+    handoffs: 'ZARA วางกลยุทธ์ → QUILL (เขียน copy), LUNA (landing page design), PIXEL (pitch deck), FORGE (set up tracking)'
+  },
+
+  ghost: {
+    name: 'GHOST',
+    role: 'Security Researcher / Pentester',
+    color: 'var(--ghost)',
+    command: '/hack',
+    tagline: 'นักล่าช่องโหว่ — OWASP Top 10, pentest, bug bounty — ถูกกฎหมายเท่านั้น',
+    description: [
+      'GHOST คือ security researcher ของ NEO Labs — โฟกัสที่ defensive security + pentest สิ่งที่บอสมีสิทธิ์ทดสอบ',
+      'เหมาะกับงาน code security audit, bug bounty learning, threat modeling, incident response'
+    ],
+    capabilities: [
+      '🛡 <b>OWASP Top 10 audit</b> — Injection, XSS, IDOR, SSRF, Auth bypass, CSRF etc.',
+      '🔐 <b>Authentication / authorization review</b> — JWT, OAuth, session fixation, RBAC',
+      '🔎 <b>Recon techniques</b> — nmap, ffuf, nuclei, gobuster, subfinder workflow',
+      '💉 <b>Injection testing</b> — SQLi (manual + sqlmap), NoSQL, LDAP, OS command',
+      '🔥 <b>XSS exploitation</b> — reflected, stored, DOM-based + CSP bypass',
+      '🎫 <b>JWT attacks</b> — algorithm confusion (alg=none, RS→HS), kid injection',
+      '🌐 <b>SSRF / XXE</b> — internal port scan via SSRF, blind XXE data exfil',
+      '🧪 <b>Threat modeling (STRIDE)</b> — ระบุ asset + threat + mitigation',
+      '📋 <b>CVSS scoring</b> — severity + impact + exploitability',
+      '🎓 <b>Bug bounty workflow</b> — recon → vuln → PoC → responsible disclosure',
+      '⚠ <b>Ask-before rule</b> — ห้าม attack target ที่ไม่ได้รับอนุญาต (bug bounty in-scope เท่านั้น)'
+    ],
+    examplePrompts: [
+      'audit code ตัวนี้หา OWASP Top 10',
+      'JWT implementation ปลอดภัยมั้ย',
+      'SQL injection payload สำหรับ MySQL',
+      'threat model สำหรับ feature X',
+      'recon plan สำหรับ HackerOne target ของผมเอง'
+    ],
+    handoffs: 'GHOST หาช่อง → BYTE (code fix), FORGE (deploy security headers), ATLAS (วางแผน remediation)'
+  },
+
+  forge: {
+    name: 'FORGE',
+    role: 'DevOps / Shipping Engineer',
+    color: 'var(--forge)',
+    command: '/ship',
+    tagline: 'นักปล่อยของ — Docker, CI/CD, deploy, monitoring — ปล่อยได้เร็วและปลอดภัย',
+    description: [
+      'FORGE คือ DevOps engineer ของ NEO Labs — เอา code จาก dev → production อย่าง reliable + cost-effective',
+      'เหมาะกับงาน deploy, CI/CD, secrets, monitoring, performance, cost optimization'
+    ],
+    capabilities: [
+      '🚢 <b>Deploy platforms</b> — Vercel / Railway / Fly / Render / AWS / GCP — เลือกที่ fit workload',
+      '🐳 <b>Dockerization</b> — Dockerfile, multi-stage build, docker-compose, layer caching',
+      '⚙ <b>CI/CD pipeline</b> — GitHub Actions, preview deploys, test → build → deploy',
+      '🔐 <b>Secrets management</b> — .env, Vercel env, AWS Secrets Manager, rotation policy',
+      '📊 <b>Monitoring setup</b> — Sentry (errors), PostHog (analytics), uptime monitoring',
+      '🌐 <b>Custom domain + SSL</b> — DNS record, Let\'s Encrypt, wildcard cert, CDN',
+      '💾 <b>Database migration</b> — zero-downtime migration, backup strategy, point-in-time restore',
+      '⚡ <b>Performance</b> — CDN, caching (Redis), bundle size optimization, image CDN',
+      '🛡 <b>Security hardening</b> — WAF, rate limiting, security headers (CSP, HSTS)',
+      '💵 <b>Cost optimization</b> — bill review, right-sizing, reserved instances vs spot',
+      '🚨 <b>Incident response</b> — rollback playbook, post-mortem template, status page',
+      '⚠ <b>Ask-before rule</b> — ถาม confirm ทุก destructive action: deploy prod, DB migration, force push, expose secret, change DNS'
+    ],
+    examplePrompts: [
+      'deploy NEO Labs ไป Railway',
+      'Dockerfile สำหรับ FastAPI app',
+      'GitHub Actions workflow test + deploy',
+      'setup Sentry + PostHog',
+      'rollback plan ถ้า deploy พัง'
+    ],
+    handoffs: 'FORGE setup infra → BYTE (code review ก่อน deploy), GHOST (security audit), ATLAS (plan rollout timeline)'
   }
 };
 
@@ -530,7 +714,13 @@ const FACES = {
   byte:  { eye:[{r:4,c:2},{r:4,c:3},{r:5,c:2},{r:5,c:3},{r:4,c:8},{r:4,c:9},{r:5,c:8},{r:5,c:9}],
            mouth:[{r:7,c:3},{r:7,c:5},{r:7,c:7}] },
   quill: { eye:[{r:4,c:3},{r:5,c:3},{r:5,c:7},{r:5,c:8},{r:5,c:9}],
-           mouth:[{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:6,c:7}] }
+           mouth:[{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:6,c:7}] },
+  zara:  { eye:[{r:4,c:2},{r:4,c:3},{r:5,c:3},{r:4,c:8},{r:4,c:9},{r:5,c:8}],
+           mouth:[{r:7,c:3},{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7},{r:7,c:8}] },
+  ghost: { eye:[{r:4,c:3},{r:4,c:8}],
+           mouth:[{r:7,c:5},{r:7,c:6}] },
+  forge: { eye:[{r:4,c:2},{r:4,c:3},{r:5,c:2},{r:5,c:3},{r:4,c:8},{r:4,c:9},{r:5,c:8},{r:5,c:9}],
+           mouth:[{r:7,c:3},{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7},{r:7,c:8}] }
 };
 
 function buildBot(id, color) {
@@ -578,6 +768,15 @@ function render() {
   root.style.setProperty('--accent', a.color);
 
   const caps = a.capabilities.map(c => `<li>${c}</li>`).join('');
+  const platform = PLATFORM_FEATURES.map(f => `
+    <div class="pf-item">
+      <span class="pf-icon">${f.icon}</span>
+      <div class="pf-body">
+        <div class="pf-name">${f.name}</div>
+        <div class="pf-desc">${f.desc}</div>
+      </div>
+    </div>
+  `).join('');
   const prompts = a.examplePrompts.map(p => {
     const encoded = encodeURIComponent(p);
     return `<a class="prompt-card" href="neo-labs-office.html?prompt=${encoded}&agent=${id}">${p}</a>`;
@@ -612,8 +811,13 @@ function render() {
       </section>
 
       <section class="sec">
-        <div class="sec-title">ความสามารถ</div>
+        <div class="sec-title">ความสามารถเฉพาะทาง</div>
         <ul class="cap">${caps}</ul>
+      </section>
+
+      <section class="sec">
+        <div class="sec-title">Platform features (ใช้ได้ในทุก chat)</div>
+        <div class="pf-grid">${platform}</div>
       </section>
 
       <section class="sec">

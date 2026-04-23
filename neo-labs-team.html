@@ -26,6 +26,9 @@
     --rex: #ef4444;      /* red */
     --byte: #3b82f6;     /* blue */
     --quill: #e5e5e5;    /* white */
+    --zara: #d946ef;     /* fuchsia */
+    --ghost: #64748b;    /* slate */
+    --forge: #0ea5e9;    /* sky */
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -305,6 +308,9 @@ const CHARS = [
   { id: 'rex',   name: 'REX',   role: "Devil's Advocate",       color: 'var(--rex)' },
   { id: 'byte',  name: 'BYTE',  role: 'Code Reviewer',          color: 'var(--byte)' },
   { id: 'quill', name: 'QUILL', role: 'Copywriter',             color: 'var(--quill)' },
+  { id: 'zara',  name: 'ZARA',  role: 'Growth Marketer',        color: 'var(--zara)' },
+  { id: 'ghost', name: 'GHOST', role: 'Security Researcher',    color: 'var(--ghost)' },
+  { id: 'forge', name: 'FORGE', role: 'DevOps / Shipping',      color: 'var(--forge)' },
 ];
 
 /*
@@ -417,6 +423,26 @@ const FACES = {
     eye:   [{r:4,c:3},{r:5,c:3},      // left eye open
             {r:5,c:7},{r:5,c:8},{r:5,c:9}],  // right eye wink line
     mouth: [{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:6,c:7}],  // smirk up
+  },
+
+  // ZARA — energetic: wide eyes + big confident smile (growth bold)
+  zara: {
+    eye:   [{r:4,c:2},{r:4,c:3},{r:5,c:3},
+            {r:4,c:8},{r:4,c:9},{r:5,c:8}],
+    mouth: [{r:7,c:3},{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7},{r:7,c:8}],
+  },
+
+  // GHOST — stealth: tiny hollow eyes + silent straight mouth
+  ghost: {
+    eye:   [{r:4,c:3},{r:4,c:8}],
+    mouth: [{r:7,c:5},{r:7,c:6}],
+  },
+
+  // FORGE — focused: square eyes + set jaw (reliable engineer)
+  forge: {
+    eye:   [{r:4,c:2},{r:4,c:3},{r:5,c:2},{r:5,c:3},
+            {r:4,c:8},{r:4,c:9},{r:5,c:8},{r:5,c:9}],
+    mouth: [{r:7,c:3},{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7},{r:7,c:8}],
   },
 };
 

@@ -27,15 +27,18 @@
     { group: 'Pages', id: 'p-logo',     label: 'Logo Explorations',         hint: 'go',  icon: '◇', run: () => nav('neo-labs-logo.html') },
 
     /* --- Agents --- (fires 'neo:agent' event; handler decides what happens) */
-    { group: 'Agents', id: 'a-neo',   label: 'NEO — CEO / Main',             hint: 'call', icon: '🟠', color: '#ff6b35', run: () => call('neo') },
-    { group: 'Agents', id: 'a-atlas', label: 'ATLAS — Chief of Staff / PM',  hint: 'call', icon: '🟢', color: '#14b8a6', run: () => call('atlas') },
-    { group: 'Agents', id: 'a-nova',  label: 'NOVA — Research Intelligence', hint: 'call', icon: '🟣', color: '#a855f7', run: () => call('nova') },
-    { group: 'Agents', id: 'a-luna',  label: 'LUNA — UX/UI Designer',        hint: 'call', icon: '🩷', color: '#ec4899', run: () => call('luna') },
-    { group: 'Agents', id: 'a-pixel', label: 'PIXEL — Slide Maker',          hint: 'call', icon: '🟢', color: '#22c55e', run: () => call('pixel') },
-    { group: 'Agents', id: 'a-sage',  label: 'SAGE — Study Tutor',           hint: 'call', icon: '🟡', color: '#eab308', run: () => call('sage') },
-    { group: 'Agents', id: 'a-rex',   label: 'REX — Devil\'s Advocate',      hint: 'call', icon: '🔴', color: '#ef4444', run: () => call('rex') },
-    { group: 'Agents', id: 'a-byte',  label: 'BYTE — Code Reviewer',         hint: 'call', icon: '🔵', color: '#3b82f6', run: () => call('byte') },
-    { group: 'Agents', id: 'a-quill', label: 'QUILL — Copywriter',           hint: 'call', icon: '⚪', color: '#e5e5e5', run: () => call('quill') },
+    { group: 'Agents', id: 'a-neo',   label: 'NEO — CEO / Main',             desc: 'Triage & delegate, force clarity, stop bad ideas, daily brief',                    hint: 'call', icon: '🟠', color: '#ff6b35', run: () => call('neo') },
+    { group: 'Agents', id: 'a-atlas', label: 'ATLAS — Chief of Staff / PM',  desc: 'Breakdown, scope/timeline, priority, risk, delegation, sprint planning',          hint: 'call', icon: '🟢', color: '#14b8a6', run: () => call('atlas') },
+    { group: 'Agents', id: 'a-nova',  label: 'NOVA — Research Intelligence', desc: 'Web search, fact-check, compare, market analysis, deep dive, paper summary',      hint: 'call', icon: '🟣', color: '#a855f7', run: () => call('nova') },
+    { group: 'Agents', id: 'a-luna',  label: 'LUNA — UX/UI Designer',        desc: 'HTML mockup, landing page, app screen, Figma→code, 3D hero, accessibility',      hint: 'call', icon: '🩷', color: '#ec4899', run: () => call('luna') },
+    { group: 'Agents', id: 'a-pixel', label: 'PIXEL — Slide Maker',          desc: 'Pitch deck, explainer, academic, Canva export, 3D animated slides, speaker notes', hint: 'call', icon: '🟢', color: '#22c55e', run: () => call('pixel') },
+    { group: 'Agents', id: 'a-sage',  label: 'SAGE — Study Tutor',           desc: 'PDF summary, Feynman, flashcard, quiz, spaced repetition, study plan',             hint: 'call', icon: '🟡', color: '#eab308', run: () => call('sage') },
+    { group: 'Agents', id: 'a-rex',   label: 'REX — Devil\'s Advocate',      desc: 'Edge case, red-team, premortem, hidden risk, alternatives, challenge assumptions',  hint: 'call', icon: '🔴', color: '#ef4444', run: () => call('rex') },
+    { group: 'Agents', id: 'a-byte',  label: 'BYTE — Code Reviewer',         desc: 'Review, OWASP audit, bug hunt, refactor, performance, secret scan, CVE check',    hint: 'call', icon: '🔵', color: '#3b82f6', run: () => call('byte') },
+    { group: 'Agents', id: 'a-quill', label: 'QUILL — Copywriter',           desc: 'Blog, caption, tweet thread, landing copy, email, video script, TH+EN bilingual', hint: 'call', icon: '⚪', color: '#e5e5e5', run: () => call('quill') },
+    { group: 'Agents', id: 'a-zara',  label: 'ZARA — Growth Marketer',       desc: 'Launch plan, SEO, paid ads, AARRR funnel, email sequence, growth loops, A/B test', hint: 'call', icon: '💹', color: '#d946ef', run: () => call('zara') },
+    { group: 'Agents', id: 'a-ghost', label: 'GHOST — Security Researcher',  desc: 'OWASP audit, pentest, bug bounty, JWT/SSRF/XSS/SQLi, threat model, CVSS scoring',  hint: 'call', icon: '🖤', color: '#64748b', run: () => call('ghost') },
+    { group: 'Agents', id: 'a-forge', label: 'FORGE — DevOps / Shipping',    desc: 'Deploy (Vercel/Railway/AWS), Docker, CI/CD, Sentry, secrets, rollback, cost tuning', hint: 'call', icon: '🛠️', color: '#0ea5e9', run: () => call('forge') },
 
     /* --- Actions --- */
     { group: 'Actions', id: 'x-shortcuts', label: 'Show keyboard shortcuts', hint: '?', icon: '⌨', run: () => { if (window.NeoShortcuts) window.NeoShortcuts.open(); else toast('Shortcuts ยังไม่พร้อม'); } },
@@ -183,7 +186,9 @@
     flex-shrink: 0;
   }
   .cmdk-item[data-color] .ico { color: var(--ic); background: color-mix(in srgb, var(--ic) 12%, transparent); }
-  .cmdk-item .label { flex: 1; font-size: 14px; color: #e8e8e8; }
+  .cmdk-item .label { flex: 1; font-size: 14px; color: #e8e8e8; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .cmdk-item .label .title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cmdk-item .label .desc { font-size: 11px; color: #8a8a98; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cmdk-item .hint {
     font-family: 'Courier New', monospace;
     font-size: 10px;
@@ -299,10 +304,14 @@
       if (a.color) { row.dataset.color = '1'; row.style.setProperty('--ic', a.color); }
       row.innerHTML = `
         <div class="ico">${a.icon || '·'}</div>
-        <div class="label"></div>
+        <div class="label">
+          <div class="title"></div>
+          ${a.desc ? `<div class="desc"></div>` : ''}
+        </div>
         <div class="hint">${a.hint || ''}</div>
       `;
-      row.querySelector('.label').textContent = a.label;
+      row.querySelector('.title').textContent = a.label;
+      if (a.desc) row.querySelector('.desc').textContent = a.desc;
       row.addEventListener('click', () => exec(i));
       row.addEventListener('mousemove', () => {
         if (activeIdx !== i) { activeIdx = i; render(); }
@@ -319,7 +328,7 @@
     q = q.trim().toLowerCase();
     if (!q) { filtered = [...ACTIONS]; activeIdx = 0; render(); return; }
     filtered = ACTIONS.filter(a => {
-      const hay = (a.label + ' ' + a.group + ' ' + a.id).toLowerCase();
+      const hay = (a.label + ' ' + (a.desc || '') + ' ' + a.group + ' ' + a.id).toLowerCase();
       return q.split(/\s+/).every(tok => hay.includes(tok));
     });
     activeIdx = 0;

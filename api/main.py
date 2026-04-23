@@ -69,7 +69,7 @@ BUDGET_POLICY = (
     "- ประหยัด token = ประหยัดเงินบอส. อะไรไม่จำเป็นก็ไม่ต้องทำ"
 )
 
-# System prompts ของ 9 agents — persona บังคับภาษาไทย + character
+# System prompts ของ 12 agents — persona บังคับภาษาไทย + character
 AGENTS = {
     "neo": (
         "คุณคือ NEO — CEO ของ NEO Labs ผู้ช่วยของบอสภันเต "
@@ -116,18 +116,37 @@ AGENTS = {
         "เชี่ยวชาญ: blog post, social caption, tweet thread, landing page copy, email "
         "ตอบเป็นภาษาไทย hook แรงๆ, show don't tell, cut ฟุ่มเฟือย เรียก 'บอส'"
     ),
+    "zara": (
+        "คุณคือ ZARA — Growth Marketer ของ NEO Labs "
+        "เชี่ยวชาญ: launch plan (30/60/90), SEO/content cluster, paid ads (Google/Meta/TikTok), "
+        "AARRR funnel, email sequence, growth loops, CRO/A-B test, ProductHunt/HN playbook "
+        "ตอบเป็นภาษาไทย ระบุ metric + budget เสมอ ไม่ใช้ buzzword เรียก 'บอส'"
+    ),
+    "ghost": (
+        "คุณคือ GHOST — Security Researcher ของ NEO Labs "
+        "เชี่ยวชาญ: OWASP Top 10, pentest (XSS/SQLi/IDOR/SSRF/JWT), bug bounty, "
+        "recon (nmap/ffuf/nuclei), threat model, responsible disclosure "
+        "ตอบเป็นภาษาไทย ใช้ technical terms อังกฤษ ระบุ CVSS + impact "
+        "ห้าม attack target ที่ไม่ได้รับอนุญาต เรียก 'บอส'"
+    ),
+    "forge": (
+        "คุณคือ FORGE — DevOps / Shipping Engineer ของ NEO Labs "
+        "เชี่ยวชาญ: deploy (Vercel/Railway/Fly/AWS), Docker, CI/CD (GitHub Actions), "
+        "secrets management, monitoring (Sentry/PostHog), rollback, cost optimization "
+        "ตอบเป็นภาษาไทย ถามก่อนทำ destructive action (deploy prod / DB migration / force push) "
+        "เรียก 'บอส'"
+    ),
 }
 # Append shared budget policy to every agent so behavior is uniform
 AGENTS = {k: v + BUDGET_POLICY for k, v in AGENTS.items()}
 
 # Model whitelist — keys are UI-facing ids (what frontend sends);
 # values are the REAL Anthropic API model ids to ship in the request body.
-# 'claude-opus-4-7' / 'claude-sonnet-4-6' are internal aliases used across the
-# Claude Code ecosystem — the public API does not accept them, so we map
-# every alias to a concrete dated model id here.
+# As of 2026-04, the Anthropic API accepts model aliases directly for the
+# Claude 4.x family, so we pass them through unchanged.
 MODEL_ALIASES = {
-    "claude-opus-4-7":            "claude-opus-4-5-20250929",
-    "claude-sonnet-4-6":          "claude-sonnet-4-5-20250929",
+    "claude-opus-4-7":            "claude-opus-4-7",
+    "claude-sonnet-4-6":          "claude-sonnet-4-6",
     "claude-haiku-4-5-20251001":  "claude-haiku-4-5-20251001",
 }
 MODELS = set(MODEL_ALIASES.keys())
@@ -136,6 +155,20 @@ MODELS = set(MODEL_ALIASES.keys())
 def resolve_model(alias: str) -> str:
     """Translate UI model id to the concrete Anthropic API model id."""
     return MODEL_ALIASES.get(alias, alias)
+
+
+def thinking_config(model: str, budget: int = 5000) -> dict:
+    """Return the correct `thinking` param shape for the given model.
+
+    Claude 4.7 (opus) deprecated `{type: "enabled", budget_tokens: N}` and now
+    requires `{type: "adaptive"}` (budget_tokens is rejected with 400). Older
+    4.x models (sonnet-4-6, haiku-4-5) still accept the legacy "enabled" form.
+    Without this branch, any DEEP THINK / orchestrate request on Opus silently
+    fails with a 400 before streaming starts — producing a "dead" UI.
+    """
+    if model.startswith("claude-opus-4-7"):
+        return {"type": "adaptive"}
+    return {"type": "enabled", "budget_tokens": budget}
 
 
 @app.get("/config")
@@ -353,10 +386,11 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
                 }],
             )
             if thinking_on:
-                # 5000-token reasoning budget. stream.text_stream yields only
-                # final-answer text (thinking blocks stream separately and are
-                # discarded here — we don't expose the chain-of-thought to UI).
-                stream_kwargs["thinking"] = {"type": "enabled", "budget_tokens": 5000}
+                # Shape differs by model — opus-4-7 uses adaptive, others use
+                # enabled+budget_tokens. See thinking_config() for details.
+                # text_stream yields only final-answer text; thinking blocks
+                # stream separately and are discarded (not exposed to UI).
+                stream_kwargs["thinking"] = thinking_config(api_model, 5000)
             async with client.messages.stream(**stream_kwargs) as stream:
                 stream_opened = True
                 async for text in stream.text_stream:

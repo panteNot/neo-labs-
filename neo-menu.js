@@ -48,6 +48,9 @@
         { icon: '🔴', label: 'REX',   sub: "Devil's Advocate",       href: 'neo-labs-agent.html?id=rex' },
         { icon: '🔵', label: 'BYTE',  sub: 'Code Reviewer',          href: 'neo-labs-agent.html?id=byte' },
         { icon: '⚪', label: 'QUILL', sub: 'Copywriter',             href: 'neo-labs-agent.html?id=quill' },
+        { icon: '💹', label: 'ZARA',  sub: 'Growth Marketer',        href: 'neo-labs-agent.html?id=zara' },
+        { icon: '🖤', label: 'GHOST', sub: 'Security Researcher',    href: 'neo-labs-agent.html?id=ghost' },
+        { icon: '🛠️', label: 'FORGE', sub: 'DevOps / Shipping',      href: 'neo-labs-agent.html?id=forge' },
       ],
     },
     {

@@ -48,7 +48,8 @@ ORCHESTRATOR_SUFFIX = (
     "**Delegation:** คุณสามารถ delegate งานย่อยให้ specialist agents ผ่าน tool 'delegate' ได้ "
     "ใช้เมื่อเห็นว่าเรื่องนั้น agent อื่นถนัดกว่า (เช่น research → NOVA, design → LUNA, "
     "copy → QUILL, code review → BYTE, stress-test ไอเดีย → REX, plan → ATLAS, "
-    "slide → PIXEL, study/explain → SAGE). "
+    "slide → PIXEL, study/explain → SAGE, "
+    "growth/marketing → ZARA, security/pentest → GHOST, deploy/DevOps → FORGE). "
     "หลังได้ผลจาก specialists แล้ว — สรุป + สังเคราะห์ให้บอสเป็นคำตอบเดียว "
     "อย่าก๊อป output ของ specialist มาโต้งๆ"
     "\n\n**File Tools:** คุณมี tool สำหรับสร้าง/อ่าน/แก้ไขไฟล์ในบอส workspace ด้วย — "
@@ -60,7 +61,7 @@ ORCHESTRATOR_SUFFIX = (
     "- **ขั้น 1:** NEO ลองตอบเองก่อนเสมอ. ถ้า knowledge ทั่วไป / คำถามง่าย / สรุปสั้น → ตอบเลย (0 delegate)\n"
     "- **ขั้น 2:** ถ้าต้องผู้เชี่ยวชาญจริงๆ → delegate **เพียง 1 คน** ที่ตรงที่สุด\n"
     "- **ขั้น 3:** ถ้าโจทย์ซับซ้อนหลายมิติ → delegate 2-3 คนได้ แต่ต้อง justify ในหัวก่อน\n"
-    "- **ห้าม:** spawn ทั้งทีม (8 คน) ถ้าบอสไม่ได้ขอ. ห้าม delegate เรื่องที่ตัวเองตอบได้ง่ายๆ\n"
+    "- **ห้าม:** spawn ทั้งทีม (11 คน) ถ้าบอสไม่ได้ขอ. ห้าม delegate เรื่องที่ตัวเองตอบได้ง่ายๆ\n"
     "- ก่อนสร้างไฟล์/รูป/สไลด์ หรือ delegate หลายคน → ถามบอสก่อน 1 บรรทัดสั้น\n"
     "  เช่น 'ทำเป็นไฟล์ .md หรือสรุป chat ก็พอคะบอส? จะ delegate NOVA หรือ NEO ตอบเองก็พอ?'\n"
     "- งานเล็ก/ชัดเจน → ตอบเลยไม่ต้องถาม. ประหยัด token = ประหยัดเงินบอส"
@@ -116,7 +117,14 @@ async def orchestrate(
                 # blocks in resp.content flow back into messages[] on the next
                 # loop (via `resp.content` append), which is required for Claude
                 # to chain-of-thought across tool_use cycles correctly.
-                root_kwargs["thinking"] = {"type": "enabled", "budget_tokens": 5000}
+                # opus-4-7 requires {type:"adaptive"} (budget_tokens forbidden),
+                # while sonnet-4-6 / haiku-4-5 keep the legacy enabled+budget
+                # shape. Mixing the wrong shape returns a 400 and kills the run.
+                root_kwargs["thinking"] = (
+                    {"type": "adaptive"}
+                    if model.startswith("claude-opus-4-7")
+                    else {"type": "enabled", "budget_tokens": 5000}
+                )
             resp = await client.messages.create(**root_kwargs)
         except Exception as e:
             yield {"type": "error", "message": f"root call failed: {e}"}

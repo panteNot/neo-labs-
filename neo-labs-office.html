@@ -30,6 +30,9 @@
   --rex:   #ef4444;
   --byte:  #3b82f6;
   --quill: #e5e5e5;
+  --zara:  #d946ef;
+  --ghost: #64748b;
+  --forge: #0ea5e9;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -200,12 +203,12 @@ body {
   z-index: 1;
 }
 
-/* rooms arranged in 3x3 grid absolute */
+/* rooms arranged in 4x3 grid (12 agents) */
 .rooms {
   position: absolute;
   inset: 16px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: 10px;
   pointer-events: none;
@@ -1790,7 +1793,7 @@ body {
 
 <script>
 /* ============================================================
-   DATA — 9 agents (arranged in 3x3: top=leadership, mid=creative, bot=QA)
+   DATA — 12 agents (3 rows of 4: top=leadership+research, mid=creative, bot=QA+ops)
    ============================================================ */
 const CHARS = [
   { id:'neo',   name:'NEO',   color:'var(--neo)',   role:'CEO / Main',         hex:'#ff6b35' },
@@ -1802,6 +1805,9 @@ const CHARS = [
   { id:'rex',   name:'REX',   color:'var(--rex)',   role:"Devil's Advocate",   hex:'#ef4444' },
   { id:'byte',  name:'BYTE',  color:'var(--byte)',  role:'Code Reviewer',      hex:'#3b82f6' },
   { id:'quill', name:'QUILL', color:'var(--quill)', role:'Copywriter',         hex:'#e5e5e5' },
+  { id:'zara',  name:'ZARA',  color:'var(--zara)',  role:'Growth Marketer',    hex:'#d946ef' },
+  { id:'ghost', name:'GHOST', color:'var(--ghost)', role:'Security Researcher',hex:'#64748b' },
+  { id:'forge', name:'FORGE', color:'var(--forge)', role:'DevOps / Shipping',  hex:'#0ea5e9' },
 ];
 
 /* pixel bot blueprint (10x10 grid) */
@@ -1831,6 +1837,12 @@ const FACES = {
   rex:   { eye:[{r:4,c:2},{r:5,c:3},{r:5,c:8},{r:4,c:9}], mouth:[{r:7,c:3},{r:6,c:4},{r:7,c:5},{r:6,c:6},{r:7,c:7},{r:6,c:8}] },
   byte:  { eye:[{r:4,c:2},{r:4,c:3},{r:5,c:2},{r:5,c:3},{r:4,c:8},{r:4,c:9},{r:5,c:8},{r:5,c:9}], mouth:[{r:7,c:3},{r:7,c:5},{r:7,c:7}] },
   quill: { eye:[{r:4,c:3},{r:5,c:3},{r:5,c:7},{r:5,c:8},{r:5,c:9}], mouth:[{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:6,c:7}] },
+  // ZARA — energetic wide eyes + confident smile (growth vibe)
+  zara:  { eye:[{r:4,c:2},{r:4,c:3},{r:5,c:3},{r:4,c:8},{r:4,c:9},{r:5,c:8}], mouth:[{r:7,c:3},{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7},{r:7,c:8}] },
+  // GHOST — hollow narrow eyes + silent straight mouth (stealth)
+  ghost: { eye:[{r:4,c:3},{r:4,c:8}], mouth:[{r:7,c:5},{r:7,c:6}] },
+  // FORGE — focused square eyes + strong set jaw (reliable)
+  forge: { eye:[{r:4,c:2},{r:4,c:3},{r:5,c:2},{r:5,c:3},{r:4,c:8},{r:4,c:9},{r:5,c:8},{r:5,c:9}], mouth:[{r:7,c:3},{r:7,c:4},{r:7,c:5},{r:7,c:6},{r:7,c:7},{r:7,c:8}] },
 };
 
 function buildBotEl(id, color, klass) {
@@ -1894,11 +1906,11 @@ CHARS.forEach(ch => {
 });
 
 const botWrappers = {};
-// initial positions: spread across 3x3 grid (relative to botsLayer)
+// initial positions: spread across 4x3 grid (12 agents)
 const INIT_POS = [
-  {x: 0.167, y: 0.20}, {x: 0.5, y: 0.20}, {x: 0.833, y: 0.20},
-  {x: 0.167, y: 0.50}, {x: 0.5, y: 0.50}, {x: 0.833, y: 0.50},
-  {x: 0.167, y: 0.80}, {x: 0.5, y: 0.80}, {x: 0.833, y: 0.80},
+  {x: 0.125, y: 0.20}, {x: 0.375, y: 0.20}, {x: 0.625, y: 0.20}, {x: 0.875, y: 0.20},
+  {x: 0.125, y: 0.50}, {x: 0.375, y: 0.50}, {x: 0.625, y: 0.50}, {x: 0.875, y: 0.50},
+  {x: 0.125, y: 0.80}, {x: 0.375, y: 0.80}, {x: 0.625, y: 0.80}, {x: 0.875, y: 0.80},
 ];
 
 CHARS.forEach((ch, i) => {
@@ -3157,7 +3169,10 @@ function handleOrchEvent(ev, activeItems) {
     if (botWrappers[ev.agent]) botWrappers[ev.agent].el.dataset.status = 'idle';
     activeItems[ev.agent] = null;
   } else if (ev.type === 'error') {
+    // Surface the error in the feed too — terminal-only errors made it look
+    // like DELEGATE was silently doing nothing (e.g. 400 from Opus + thinking).
     term(`orchestrate error: ${ev.message}`, 'term-err', '✗');
+    addFeedItem('ERROR', '#ef4444', 'orchestrate error: ' + (ev.message || 'unknown'));
   }
 }
 
