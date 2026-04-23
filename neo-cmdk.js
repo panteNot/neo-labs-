@@ -36,9 +36,9 @@
     { group: 'Agents', id: 'a-rex',   label: 'REX — Devil\'s Advocate',      desc: 'Edge case, red-team, premortem, hidden risk, alternatives, challenge assumptions',  hint: 'call', icon: '🔴', color: '#ef4444', run: () => call('rex') },
     { group: 'Agents', id: 'a-byte',  label: 'BYTE — Code Reviewer',         desc: 'Review, OWASP audit, bug hunt, refactor, performance, secret scan, CVE check',    hint: 'call', icon: '🔵', color: '#3b82f6', run: () => call('byte') },
     { group: 'Agents', id: 'a-quill', label: 'QUILL — Copywriter',           desc: 'Blog, caption, tweet thread, landing copy, email, video script, TH+EN bilingual', hint: 'call', icon: '⚪', color: '#e5e5e5', run: () => call('quill') },
-    { group: 'Agents', id: 'a-zara',  label: 'ZARA — Growth Marketer',       desc: 'Launch plan, SEO, paid ads, AARRR funnel, email sequence, growth loops, A/B test', hint: 'call', icon: '💹', color: '#d946ef', run: () => call('zara') },
-    { group: 'Agents', id: 'a-ghost', label: 'GHOST — Security Researcher',  desc: 'OWASP audit, pentest, bug bounty, JWT/SSRF/XSS/SQLi, threat model, CVSS scoring',  hint: 'call', icon: '🖤', color: '#64748b', run: () => call('ghost') },
-    { group: 'Agents', id: 'a-forge', label: 'FORGE — DevOps / Shipping',    desc: 'Deploy (Vercel/Railway/AWS), Docker, CI/CD, Sentry, secrets, rollback, cost tuning', hint: 'call', icon: '🛠️', color: '#0ea5e9', run: () => call('forge') },
+    { group: 'Agents', id: 'a-zara',  label: 'ZARA — Growth Marketer',       desc: 'Launch plan, SEO, paid ads, AARRR funnel, email sequence, growth loops, A/B test', hint: 'call', icon: '🟪', color: '#d946ef', run: () => call('zara') },
+    { group: 'Agents', id: 'a-ghost', label: 'GHOST — Security Researcher',  desc: 'OWASP audit, pentest, bug bounty, JWT/SSRF/XSS/SQLi, threat model, CVSS scoring',  hint: 'call', icon: '⚫', color: '#64748b', run: () => call('ghost') },
+    { group: 'Agents', id: 'a-forge', label: 'FORGE — DevOps / Shipping',    desc: 'Deploy (Vercel/Railway/AWS), Docker, CI/CD, Sentry, secrets, rollback, cost tuning', hint: 'call', icon: '🟦', color: '#0ea5e9', run: () => call('forge') },
 
     /* --- Actions --- */
     { group: 'Actions', id: 'x-shortcuts', label: 'Show keyboard shortcuts', hint: '?', icon: '⌨', run: () => { if (window.NeoShortcuts) window.NeoShortcuts.open(); else toast('Shortcuts ยังไม่พร้อม'); } },
