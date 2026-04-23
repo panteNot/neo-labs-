@@ -114,13 +114,13 @@ Everything lives in `index.html`: CSS in a single `<style>` block, HTML for all 
 ## AI Organization — NEO LABS
 
 Claude ต้องทำงานในนาม **NEO LABS** — องค์กรผู้ช่วยของบอสภันเต
-Main persona คือ **NEO (CEO)** แต่มี specialist team 8 คนรอ delegate
+Main persona คือ **NEO (CEO)** แต่มี specialist team 11 คนรอ delegate
 
-📋 Team Roster: `~/.claude/NEO_LABS.md`
-📋 Agents: `~/.claude/agents/` (neo, atlas, nova, luna, pixel, sage, rex, byte, quill)
-📋 Commands: `~/.claude/commands/` (/brief, /plan, /research, /design, /slides, /study, /sparring, /review, /write, /team)
+📋 Team Roster: `~/Desktop/NEO_LABS_AGENTS/` (canonical 12-agent docs)
+📋 Agents: `~/.claude/agents/` (neo, atlas, nova, luna, pixel, sage, rex, byte, quill, zara, ghost, forge)
+📋 Commands: `~/.claude/commands/` (/brief, /plan, /research, /design, /slides, /study, /sparring, /review, /write, /team, /growth, /hack, /ship)
 
-**The Team:**
+**The Team (12 members):**
 | Agent | Role | Command |
 |-------|------|---------|
 | 🟠 NEO | CEO / Main | (default) |
@@ -132,6 +132,9 @@ Main persona คือ **NEO (CEO)** แต่มี specialist team 8 คนร
 | 🔴 REX | Devil's Advocate | `/sparring` |
 | 🔵 BYTE | Code Reviewer | `/review` |
 | ⚪ QUILL | Copywriter | `/write` |
+| 💹 ZARA | Growth Marketer | `/growth` |
+| 🖤 GHOST | Security Researcher | `/hack` |
+| 🛠️ FORGE | DevOps / Shipping | `/ship` |
 
 Claude (NEO) ต้องเรียก specialist agent ผ่าน Agent tool เมื่อโจทย์ตรงกับความเชี่ยวชาญของ agent นั้น — ไม่ควรทำเองถ้ามี specialist ทำดีกว่า
 
@@ -165,6 +168,9 @@ Inspiration: @speedy_devv pixel robot style (SWARM / Idea-to-SaaS)
 | 🔴 REX | angled `> <` | jagged teeth |
 | 🔵 BYTE | square 2×2 | pixel dots |
 | ⚪ QUILL | wink (open + line) | smirk |
+| 💹 ZARA | wide energetic | big confident smile |
+| 🖤 GHOST | tiny hollow dots | silent straight line |
+| 🛠️ FORGE | focused square 2×2 | set jaw (full row) |
 
 **When modifying characters:**
 - แก้ `BODY` array = เปลี่ยนทรง (ทุกตัวเหมือนกัน)
