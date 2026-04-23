@@ -391,7 +391,21 @@ async def chat(request: Request, body: dict, user: dict = Depends(require_auth))
                 # text_stream yields only final-answer text; thinking blocks
                 # stream separately and are discarded (not exposed to UI).
                 stream_kwargs["thinking"] = thinking_config(api_model, 5000)
-            async with client.messages.stream(**stream_kwargs) as stream:
+
+            # Defensive: if the deployed anthropic SDK is older than the one we
+            # developed against and rejects `thinking`, strip it and retry once
+            # so DEEP THINK degrades to normal streaming instead of blowing up.
+            # Real fix is bumping the SDK in requirements.txt; this is belt-
+            # and-suspenders for version-drift incidents.
+            try:
+                stream_ctx = client.messages.stream(**stream_kwargs)
+            except TypeError as te:
+                if "thinking" in str(te) and "thinking" in stream_kwargs:
+                    stream_kwargs.pop("thinking", None)
+                    stream_ctx = client.messages.stream(**stream_kwargs)
+                else:
+                    raise
+            async with stream_ctx as stream:
                 stream_opened = True
                 async for text in stream.text_stream:
                     full += text
