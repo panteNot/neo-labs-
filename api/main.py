@@ -1,7 +1,7 @@
 """NEO Labs Web App — FastAPI backend entry point."""
 from fastapi import Depends, FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from pathlib import Path
@@ -722,6 +722,12 @@ async def generate_3d(request: Request, body: dict, user: dict = Depends(require
             yield f"\n// stream error: {type(e).__name__}: {str(e)[:300]}"
 
     return StreamingResponse(generate(), media_type="text/plain")
+
+
+# Root path → login page (CampusEats index.html is gitignored, not deployed).
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/neo-labs-login.html", status_code=307)
 
 
 # Serve all .html/.css/.js from web/ folder (must be LAST — catch-all).
