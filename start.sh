@@ -14,7 +14,7 @@ if [ ! -f .env ] || ! grep -q "sk-ant-" .env 2>/dev/null; then
 fi
 
 # เปิด browser ก่อน (เปิด 2 วินาทีหลัง server boot)
-(sleep 2 && open ../neo-labs-office.html) &
+(sleep 2 && open http://localhost:8000/neo-labs-office.html) &
 
 # activate venv + รัน uvicorn
 source venv/bin/activate

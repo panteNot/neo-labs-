@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Active Projects
 
 ### 1. NEO Labs Web App (🔥 Current Focus)
-2 modes ทำงานคู่กัน ใช้ UI base เดียวกัน (`neo-labs-office.html`):
+2 modes ทำงานคู่กัน ใช้ UI base เดียวกัน (`web/neo-labs-office.html`):
 - **Option C (Hybrid)** — ฟรี, ใช้ทุกวัน: Claude Code เขียน log → office page แสดง activity feed live
 - **Option B (Full API)** — $20, กรณีศึกษา/demo: FastAPI + Claude API + WebSocket + deploy
 - **Priority ตอนนี้:** ทำ C ก่อน (เร็ว, ฟรี) → แล้วค่อยทำ B
@@ -17,11 +17,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Resume:** พิมพ์ "ทำต่อ NEO Labs" → NEO อ่าน PROJECT_STATUS.md → เริ่ม C1 ทันที
 
 #### Auth & Deployment Stack (เซ็ตแล้ว 2026-04-19)
-- **Login page:** `neo-labs-login.html` — Google Sign-In (GIS) + demo credential + 9-character pixel robot pedestal + mouse-tracking pupils + 6 emotion states
+- **Login page:** `web/neo-labs-login.html` — Google Sign-In (GIS) + demo credential + 9-character pixel robot pedestal + mouse-tracking pupils + 6 emotion states
 - **Google OAuth Client ID:** `507309950334-6o5c75ms28a9bng6e9cq5jkv2spssnt6.apps.googleusercontent.com` (project `neo-labs-493816`)
 - **Authorized origin:** `http://localhost:8000` (ต้องเพิ่มตอน deploy domain จริง)
 - **FastAPI serves static + API ที่ port 8000 เดียว** — `app.mount("/", StaticFiles(directory=..))` ท้าย `api/main.py`
-- **Session:** JWT decode ฝั่ง client → `localStorage['neo_user']` → redirect `neo-labs-office.html`
+- **Session:** JWT decode ฝั่ง client → `localStorage['neo_user']` → redirect `web/neo-labs-office.html`
 - **Run:** `./start.sh` หรือ `cd api && source venv/bin/activate && uvicorn main:app --port 8000 --reload`
 
 #### 🗺️ Roadmap / Ideas Backlog (brainstorm 2026-04-19)
@@ -29,17 +29,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Enterprise-grade patterns ที่ทีม dev ดังๆ (Linear / Vercel / Anthropic / Raycast / Cursor / Figma / Notion) ใช้ — เก็บไว้ทำต่อ
 
 **Sprint Next — DONE ✅ (2026-04-20)**
-1. ✅ **Command Palette ⌘K** — `neo-cmdk.js`, overlay search, 21 entries (pages+agents+actions)
-2. ✅ **Protected Routes + Auth Middleware** — `neo-auth.js` (frontend guard + user badge + 7-day expiry + cross-tab logout + auto-inject Bearer) + `api/auth.py` (Google JWT verify + email whitelist + rate limit) + `X-Hook-Token` for local hooks
+1. ✅ **Command Palette ⌘K** — `web/neo-cmdk.js`, overlay search, 21 entries (pages+agents+actions)
+2. ✅ **Protected Routes + Auth Middleware** — `web/neo-auth.js` (frontend guard + user badge + 7-day expiry + cross-tab logout + auto-inject Bearer) + `api/auth.py` (Google JWT verify + email whitelist + rate limit) + `X-Hook-Token` for local hooks
 3. ✅ **Presence & Typing Indicators** — `kind: 'start'/'done'` + `corr` id in logger → feed "thinking..." with bouncing dots, robot glow, replaced in-place on completion. PreToolUse hook registered (`hook_pre.sh`)
 
 **Sprint Then:**
-4. ✅ **Agent Council View** — `neo-labs-council.html`: 3+ columns parallel streaming from `/chat`, per-col agent picker, add/remove (max 6), model picker, AbortController on re-submit. Default triad NOVA+REX+LUNA
-5. ✅ **Artifacts Panel** — `neo-artifacts.js`: slide-in right panel, tabs Code/Preview/Markdown, auto-detect fenced blocks via `NeoArtifacts.scan()`, HTML preview in sandboxed iframe (`sandbox="allow-scripts"`, no same-origin), Copy/Download actions, ESC to close. Council columns get `.neo-arts-pill` buttons per block + "full response · md" on completion
+4. ✅ **Agent Council View** — `web/neo-labs-council.html`: 3+ columns parallel streaming from `/chat`, per-col agent picker, add/remove (max 6), model picker, AbortController on re-submit. Default triad NOVA+REX+LUNA
+5. ✅ **Artifacts Panel** — `web/neo-artifacts.js`: slide-in right panel, tabs Code/Preview/Markdown, auto-detect fenced blocks via `NeoArtifacts.scan()`, HTML preview in sandboxed iframe (`sandbox="allow-scripts"`, no same-origin), Copy/Download actions, ESC to close. Council columns get `.neo-arts-pill` buttons per block + "full response · md" on completion
 
 **Sprint Done (2026-04-20 → 2026-04-21):**
 6. ✅ **WebSocket Activity Feed** — `api/main.py` `/ws/activity` + `ConnectionManager`, office page auto-reconnect with exponential backoff + polling fallback after 3 failures. Replaces 2.5s HTTP polling
-7. ✅ **Dark/Light Theme Toggle** — `neo-theme.js` FAB bottom-right ☾/☀, `html[data-theme="light"]` CSS var overrides across all NEO pages, cross-tab sync via storage event, FOUC-proof (sets theme before render), added to ⌘K
+7. ✅ **Dark/Light Theme Toggle** — `web/neo-theme.js` FAB bottom-right ☾/☀, `html[data-theme="light"]` CSS var overrides across all NEO pages, cross-tab sync via storage event, FOUC-proof (sets theme before render), added to ⌘K
 8. ✅ **Export → Markdown** — council has `#exportBtn` (per-session), office has `#exportAllBtn` (history), ⌘K "Export conversation" auto-routes by page
 9. ✅ **BUDGET MANAGER removed** — freed up ~250 lines of CSS/JS/HTML in office page
 10. ✅ **Security cleanup (2026-04-21)** — rotated API key after diagnose leak (old: `...SlXMaAAA` → new: `...yQAA`, workspace: `neo-labs-local-v2`), deleted 2 stray files with key-in-filename, verified git history clean
@@ -142,7 +142,7 @@ Claude (NEO) ต้องเรียก specialist agent ผ่าน Agent too
 
 ### Visual Identity — Pixel Robot Characters
 
-**Team Playground:** `neo-labs-team.html` (root ของ project — interactive showcase)
+**Team Playground:** `web/neo-labs-team.html` (interactive showcase)
 
 Inspiration: @speedy_devv pixel robot style (SWARM / Idea-to-SaaS)
 

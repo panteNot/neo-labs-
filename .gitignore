@@ -22,11 +22,13 @@ workspace/
 _pdf_pages/
 
 # Off-topic / stray
-Crack
-1st
-DekDern
-NEO_XYJ_CiC.pine
 index.html
 
+# Archived experiments & references (moved out of root 2026-04-24)
+archive/
+
 # Old SE class assets (separate project)
-neo-labs-se-*
+se-class/
+
+# Trading indicator (separate project)
+trading/

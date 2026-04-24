@@ -6,7 +6,7 @@ from pathlib import Path
 LOG_FILE = Path(__file__).parent / "activity.json"
 MAX_ENTRIES = 50
 
-# สี agent ตรงกับ CSS ใน neo-labs-office.html
+# สี agent ตรงกับ CSS ใน web/neo-labs-office.html
 AGENT_COLORS = {
     "neo":   "#ff6b00",
     "atlas": "#00c896",

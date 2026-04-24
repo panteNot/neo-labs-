@@ -1,0 +1,10 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "neo-labs-office.html": "neo-labs-admin.html, neo-labs-agent.html, neo-labs-brand.html, neo-labs-council.html, neo-labs-landing.html, neo-labs-login.html, neo-labs-logo.html, neo-labs-settings.html, neo-labs-team.html",
+    "neo-cmdk.js": "neo-artifacts.js, neo-auth.js, neo-menu.js, neo-prompts.js, neo-shortcuts.js, neo-theme.js",
+    "Procfile": "railway.json, vercel.json, start.sh",
+    "CLAUDE.md": "PROJECT_STATUS.md"
+  }
+}

@@ -1,7 +1,7 @@
 # NEO Labs Web App — Project Status
 
 > **Vision:** 2 modes ทำงานคู่กัน — C ใช้ทุกวัน, B ใช้กรณีศึกษา/demo
-> UI base เดียวกัน: `neo-labs-office.html` + Activity Feed
+> UI base เดียวกัน: `web/neo-labs-office.html` + Activity Feed
 
 ---
 
@@ -14,7 +14,7 @@
 | **เปิดจาก** | Browser local file | Browser จาก URL |
 | **ราคา** | ฟรี | $20 credit |
 | **Deploy** | ไม่ต้อง | Railway + Vercel |
-| **UI** | `neo-labs-office.html` | `neo-labs-office.html` (เดิม) |
+| **UI** | `web/neo-labs-office.html` | `web/neo-labs-office.html` (เดิม) |
 
 **ลำดับ:** ทำ C ก่อน → ใช้ได้ทันที → ค่อยทำ B ต่อยอด
 
@@ -25,7 +25,7 @@
 - **Backend (B only):** Python + FastAPI
 - **AI (B only):** Claude API (`claude-opus-4-7` specialists, `claude-haiku` routing)
 - **Real-time (B only):** WebSocket (streaming)
-- **Frontend (ทั้ง B+C):** `neo-labs-office.html` + `neo-labs-team.html`
+- **Frontend (ทั้ง B+C):** `web/neo-labs-office.html` + `web/neo-labs-team.html`
 - **Agents:** 9 คน จาก `~/.claude/agents/`
 - **Deploy (B only):** Railway / Render (backend) + Vercel (frontend)
 
@@ -67,13 +67,13 @@
 - [x] `api/logger.py` — เขียน activity.json + 9 agent colors
 - [x] `api/hook_log.py` + `hook_log.sh` — parse tool_response → ส่ง real message
 - [x] `~/.claude/settings.json` — PostToolUse hook บน Agent tool
-- [x] `neo-labs-office.html` — poll `/activity` ทุก 2 วินาที → speak()
+- [x] `web/neo-labs-office.html` — poll `/activity` ทุก 2 วินาที → speak()
 - [x] venv + dependencies ติดตั้งครบ
 - [x] Tested: เรียก REX/QUILL/NOVA → เห็น real response ใน feed
 
 **วิธีใช้ C mode (ทุกวัน):**
 1. Terminal: `cd api && source venv/bin/activate && uvicorn main:app --port 8000`
-2. Browser: เปิด `neo-labs-office.html`
+2. Browser: เปิด `web/neo-labs-office.html`
 3. คุยกับ NEO ใน Claude Code ตามปกติ → เห็น robot เคลื่อนไหว + feed live
 
 ⚠️ B2+ blocked: ต้องมี ANTHROPIC_API_KEY จริงก่อน (console.anthropic.com)
@@ -84,7 +84,7 @@
 
 - [ ] สร้าง `api/logger.py` — เขียน agent activity log ลง `api/activity.json`
 - [ ] Hook Claude Code ให้ส่ง log ทุกครั้งที่ agent ถูกเรียก
-- [ ] แก้ `neo-labs-office.html` ให้ poll `activity.json` ทุก 2 วินาที
+- [ ] แก้ `web/neo-labs-office.html` ให้ poll `activity.json` ทุก 2 วินาที
 - [ ] Update Activity Feed + robot animation เมื่อ log เปลี่ยน
 - [ ] ทดสอบ: พิมพ์ `/plan` ใน Claude Code → เห็น ATLAS กระโดด
 
@@ -106,7 +106,7 @@
 | Date | Decision | Rationale |
 |------|----------|-----------|
 | 2026-04-17 | Python FastAPI > Node.js | บอสไม่เคย setup backend มาก่อน |
-| 2026-04-17 | `neo-labs-office.html` เป็น base UI | สวยอยู่แล้ว + Activity Feed UI ครบ |
+| 2026-04-17 | `web/neo-labs-office.html` เป็น base UI | สวยอยู่แล้ว + Activity Feed UI ครบ |
 | 2026-04-17 | Autonomous mode | บอสต้องการสั่งครั้งเดียว ไม่ micromanage |
 | 2026-04-17 | ทำ C+B คู่กัน | C ใช้ทุกวัน (ฟรี), B ใช้กรณีศึกษา ($20) |
 | 2026-04-17 | ทำ C ก่อน B | C เร็วกว่า ใช้ได้ก่อน B ไม่ต้องรอ API key |

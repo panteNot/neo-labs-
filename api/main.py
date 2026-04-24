@@ -724,10 +724,10 @@ async def generate_3d(request: Request, body: dict, user: dict = Depends(require
     return StreamingResponse(generate(), media_type="text/plain")
 
 
-# Serve all .html/.css/.js from project root (must be LAST — catch-all).
+# Serve all .html/.css/.js from web/ folder (must be LAST — catch-all).
 # Google OAuth origin (http://localhost:8000) stays the same.
 app.mount(
     "/",
-    StaticFiles(directory=Path(__file__).parent.parent, html=True),
+    StaticFiles(directory=Path(__file__).parent.parent / "web", html=True),
     name="static",
 )
