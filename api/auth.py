@@ -30,7 +30,8 @@ GOOGLE_CLIENT_ID = (
 _DEFAULT_WHITELIST = (
     "pantepante72@gmail.com,"
     "chayangkulkongkavitool@gmail.com,"
-    "hariss2549zaza@gmail.com"
+    "hariss2549zaza@gmail.com,"
+    "thidtayaporn.p@gmail.com"
 )
 WHITELIST = {
     e.strip().lower()
